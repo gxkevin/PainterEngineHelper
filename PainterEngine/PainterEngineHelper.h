@@ -50,7 +50,7 @@ px_bool PX_LoadShapeToResource(PX_Runtime *runtime,px_char Path[],px_char key[])
 px_bool PX_LoadAnimationToResource(PX_Runtime *runtime,px_char Path[],px_char key[]);
 px_bool PX_LoadScriptToResource(PX_Runtime *runtime,px_char Path[],px_char key[]);
 px_bool PX_LoadSoundToResource(PX_Runtime *runtime,px_char Path[],px_char key[]);
-
+px_bool PX_LoadFontModuleFromFile(PX_FontModule *fm,const px_char Path[]);
 #ifdef __cplusplus
 }
 #endif
