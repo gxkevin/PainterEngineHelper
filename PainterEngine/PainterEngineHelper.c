@@ -138,7 +138,7 @@ px_bool PX_Loop()
 			case  WM_KEYDOWN:
 				{
 					e.Event=PX_OBJECT_EVENT_KEYDOWN;
-					e.Param_uint[0]=msg.wparam;
+					e.Param_uint[0]=msg.lparam;
 				}
 				break;
 			case WM_MOUSEWHEEL:
