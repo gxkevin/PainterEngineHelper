@@ -42,7 +42,7 @@ px_void PX_FreeIOData(PX_IO_Data *io);
 px_bool PX_LoadTextureFromFile(px_memorypool *mp,px_texture *tex,px_char *path);
 px_bool PX_LoadShapeFromFile(px_memorypool *mp,px_shape *shape,px_char *path);
 px_bool PX_LoadSoundFromFile(px_memorypool *mp,px_shape *shape,px_char *path);
-px_bool PX_LoadAnimationLibraryFromFile(px_memorypool *mp,px_animationlibrary *lib,px_char *path);
+px_bool PX_LoadAnimationLibraryFromFile(px_memorypool *mp,PX_Animationlibrary *lib,px_char *path);
 px_bool PX_LoadScriptFromFile(px_memory *code,px_char *path);
 px_bool PX_LoadScriptInstanceFromFile(px_memorypool *mp,PX_ScriptVM_Instance *ins,px_char *path);
 px_bool PX_LoadTextureToResource(PX_Runtime *runtime,px_char Path[],px_char key[]);

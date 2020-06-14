@@ -428,7 +428,7 @@ px_bool PX_LoadSoundFromFile(px_memorypool *mp,px_shape *shape,px_char *path)
 }
 
 
-px_bool PX_LoadAnimationLibraryFromFile(px_memorypool *mp,px_animationlibrary *lib,px_char *path)
+px_bool PX_LoadAnimationLibraryFromFile(px_memorypool *mp,PX_Animationlibrary *lib,px_char *path)
 {
 	PX_IO_Data io;
 	io=PX_LoadFileToIOData(path);

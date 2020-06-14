@@ -91,6 +91,7 @@ BOOL PX_CreateWindow( int Width,int Height,const char *name,BOOL bfullScreen)
 	HRESULT hr;
 	D2D1_SIZE_U size;
 	RECT rc;
+	char tname[260]={0};
 
 	int nScreenWidth, nScreenHeight;
 	nScreenWidth = GetSystemMetrics(SM_CXSCREEN);
@@ -131,7 +132,12 @@ BOOL PX_CreateWindow( int Width,int Height,const char *name,BOOL bfullScreen)
 	////////////////////////////////////////////////////////////////////////////
 	//Create window
 	////////////////////////////////////////////////////////////////////////////
-	Win_Hwnd = CreateWindowA("WindowCls", name,
+#ifdef UNICODE
+	MultiByteToWideChar(CP_ACP, 0, name, -1, (LPWSTR)tname, sizeof(tname));
+#else
+	strcpy_s(tname,sizeof(tname),name);
+#endif
+	Win_Hwnd = CreateWindowA("WindowCls", tname,
 		WS_OVERLAPPED|WS_SYSMENU,
 		CW_USEDEFAULT, CW_USEDEFAULT,
 		Width, Height,
