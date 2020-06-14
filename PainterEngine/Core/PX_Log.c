@@ -9,8 +9,7 @@ void PX_ASSERT()
 
 void PX_ERROR(px_char fmt[])
 {
-	//PX_ASSERT();
-	//while(1);
+	PX_ASSERT();
 }
 
 

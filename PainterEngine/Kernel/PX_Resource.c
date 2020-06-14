@@ -8,7 +8,7 @@ px_bool PX_ResourceLibraryInit(px_memorypool *mp,PX_ResourceLibrary *lib)
 	return PX_TRUE;
 }
 
-px_bool PX_ResourceLibraryLoad(PX_ResourceLibrary *lib,PX_RESOURCE_TYPE type,px_byte *data,px_uint datasize,px_char *key)
+px_bool PX_ResourceLibraryLoad(PX_ResourceLibrary *lib,PX_RESOURCE_TYPE type,px_byte *data,px_uint datasize,const px_char key[])
 {
 	PX_Resource res;
 	res.Type=type;
@@ -191,12 +191,12 @@ px_void PX_ResourceLibraryFree(PX_ResourceLibrary *lib)
 	
 }
 
-PX_Resource *  PX_ResourceLibraryGet(PX_ResourceLibrary *lib,px_char *key)
+PX_Resource *  PX_ResourceLibraryGet(PX_ResourceLibrary *lib,const px_char key[])
 {
 	return (PX_Resource *)PX_MapGet(&lib->map,key);
 }
 
-px_bool PX_ResourceLibraryAddTexture(PX_ResourceLibrary *lib,px_char *key,px_texture *pTexture)
+px_bool PX_ResourceLibraryAddTexture(PX_ResourceLibrary *lib,const px_char key[],px_texture *pTexture)
 {
 	PX_Resource res;
 	res.Type=PX_RESOURCE_TYPE_TEXTURE;
@@ -205,7 +205,7 @@ px_bool PX_ResourceLibraryAddTexture(PX_ResourceLibrary *lib,px_char *key,px_tex
 	return PX_TRUE;
 }
 
-px_void PX_ResourceLibraryDelete(PX_ResourceLibrary *lib,px_char *key)
+px_void PX_ResourceLibraryDelete(PX_ResourceLibrary *lib,const px_char key[])
 {
 	PX_Resource * pres,*pnodeRes;
 
@@ -244,7 +244,7 @@ px_void PX_ResourceLibraryDelete(PX_ResourceLibrary *lib,px_char *key)
 	}
 }
 
-px_texture * PX_ResourceLibraryGetTexture(PX_ResourceLibrary *lib,px_char *key)
+px_texture * PX_ResourceLibraryGetTexture(PX_ResourceLibrary *lib,const px_char key[])
 {
 	PX_Resource *pres=PX_ResourceLibraryGet(lib,key);
 	if (pres&&pres->Type==PX_RESOURCE_TYPE_TEXTURE)
@@ -254,7 +254,7 @@ px_texture * PX_ResourceLibraryGetTexture(PX_ResourceLibrary *lib,px_char *key)
 	return PX_NULL;
 }
 
-px_shape * PX_ResourceLibraryGetShape(PX_ResourceLibrary *lib,px_char *key)
+px_shape * PX_ResourceLibraryGetShape(PX_ResourceLibrary *lib,const px_char key[])
 {
 	PX_Resource *pres=PX_ResourceLibraryGet(lib,key);
 	if (pres&&pres->Type==PX_RESOURCE_TYPE_SHAPE)
@@ -264,7 +264,7 @@ px_shape * PX_ResourceLibraryGetShape(PX_ResourceLibrary *lib,px_char *key)
 	return PX_NULL;
 }
 
-px_animationlibrary * PX_ResourceLibraryGetAnimationLibrary(PX_ResourceLibrary *lib,px_char *key)
+PX_Animationlibrary * PX_ResourceLibraryGetAnimationLibrary(PX_ResourceLibrary *lib,const px_char key[])
 {
 	PX_Resource *pres=PX_ResourceLibraryGet(lib,key);
 	if (pres&&pres->Type==PX_RESOURCE_TYPE_ANIMATIONLIBRARY)
@@ -274,7 +274,7 @@ px_animationlibrary * PX_ResourceLibraryGetAnimationLibrary(PX_ResourceLibrary *
 	return PX_NULL;
 }
 
-PX_ScriptVM_Instance * PX_ResourceLibraryGetScript(PX_ResourceLibrary *lib,px_char *key)
+PX_ScriptVM_Instance * PX_ResourceLibraryGetScript(PX_ResourceLibrary *lib,const px_char key[])
 {
 	PX_Resource *pres=PX_ResourceLibraryGet(lib,key);
 	if (pres&&pres->Type==PX_RESOURCE_TYPE_SCRIPT)
@@ -284,7 +284,7 @@ PX_ScriptVM_Instance * PX_ResourceLibraryGetScript(PX_ResourceLibrary *lib,px_ch
 	return PX_NULL;
 }
 
-px_memory * PX_ResourceLibraryGetData(PX_ResourceLibrary *lib,px_char *key)
+px_memory * PX_ResourceLibraryGetData(PX_ResourceLibrary *lib,const px_char key[])
 {
 	PX_Resource *pres=PX_ResourceLibraryGet(lib,key);
 	if (pres&&pres->Type==PX_RESOURCE_TYPE_DATA)
@@ -294,7 +294,7 @@ px_memory * PX_ResourceLibraryGetData(PX_ResourceLibrary *lib,px_char *key)
 	return PX_NULL;
 }
 
-PX_SoundData * PX_ResourceLibraryGetSound(PX_ResourceLibrary *lib,px_char *key)
+PX_SoundData * PX_ResourceLibraryGetSound(PX_ResourceLibrary *lib,const px_char key[])
 {
 	PX_Resource *pres=PX_ResourceLibraryGet(lib,key);
 	if (pres&&pres->Type==PX_RESOURCE_TYPE_SOUND)

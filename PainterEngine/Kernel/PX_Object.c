@@ -1,41 +1,6 @@
 #include "PX_Object.h"
 
 
-/*
-PX_Object * PX_ObjectRootCreate(px_memorypool *mp)
-{
-	PX_Object *pObject=(PX_Object *)MP_Malloc(mp,sizeof(PX_Object));
-
-	if (pObject==PX_NULL)
-	{
-		return PX_NULL;
-	}
-	pObject->x=0;
-	pObject->y=0;
-
-	pObject->Width=0;
-	pObject->Height=0;
-	pObject->Enabled=PX_TRUE;
-	pObject->Visible=PX_TRUE;
-	pObject->pChilds=PX_NULL;
-	pObject->pObject=PX_NULL;
-	pObject->pNextBrother=PX_NULL;
-	pObject->pPreBrother=PX_NULL;
-	pObject->Type=PX_OBJECT_TYPE_NULL;
-	pObject->ReceiveEvents=PX_TRUE;
-
-	pObject->pEventActions=PX_NULL;
-	pObject->User_int=0;
-	pObject->mp=mp;
-	pObject->Func_ObjectUpdate=PX_NULL;
-	pObject->Func_ObjectFree=PX_NULL;
-	pObject->Func_ObjectRender=PX_NULL;
-
-
-	return pObject;
-}
-*/
-
 PX_Object  * PX_ObjectGetChild( PX_Object *Object,px_int Index )
 {
 	PX_Object *pObject;
@@ -302,35 +267,6 @@ px_float PX_ObjectGetWidth(PX_Object *Object)
 	return Object->Width;
 }
 
-/*
-px_void PX_ObjectRootInit(PX_Object *pObject,px_float x,px_float y,px_float z,px_float Width,px_float Height,px_float Lenght)
-{
-	pObject->pParent=PX_NULL;
-	pObject->x=x;
-	pObject->y=y;
-	pObject->z=z;
-	pObject->Width=Width;
-	pObject->Height=Height;
-
-	pObject->Enabled=PX_TRUE;
-	pObject->Visible=PX_TRUE;
-	pObject->pChilds=PX_NULL;
-	pObject->pObject=PX_NULL;
-	pObject->pNextBrother=PX_NULL;
-	pObject->pPreBrother=PX_NULL;
-	pObject->Type=PX_OBJECT_TYPE_NULL;
-	pObject->ReceiveEvents=PX_TRUE;
-	pObject->impact_test_type=0;
-	pObject->impact_type=0;
-	pObject->pEventActions=PX_NULL;
-
-	pObject->User_int=0;
-	pObject->User_ptr=PX_NULL;
-	pObject->Func_ObjectFree=PX_NULL;
-	pObject->Func_ObjectRender=PX_NULL;
-}
-
-*/
 
 px_void PX_ObjectInit(px_memorypool *mp,PX_Object *pObject,PX_Object *Parent,px_float x,px_float y,px_float z,px_float Width,px_float Height,px_float Lenght )
 {
@@ -515,7 +451,7 @@ px_void PX_ObjectPostEvent( PX_Object *pPost,PX_Object_Event Event )
 
 
 
-PX_Object* PX_Object_LabelCreate(px_memorypool *mp,PX_Object *Parent,px_int x,px_int y,px_int Width,px_int Height,px_char *Text,px_color Color )
+PX_Object* PX_Object_LabelCreate(px_memorypool *mp,PX_Object *Parent,px_int x,px_int y,px_int Width,px_int Height,const px_char *Text,px_color Color )
 {
 	px_int TextLen;
 	PX_Object *pObject;
@@ -630,7 +566,7 @@ px_void PX_Object_LabelSetBackgroundColor( PX_Object *pObject,px_color Color )
 		pLabel->BackgroundColor=Color;
 	}
 }
-px_void PX_Object_LabelSetAlign( PX_Object *pObject,px_uchar Align )
+px_void PX_Object_LabelSetAlign( PX_Object *pObject,px_dword Align )
 {
 	PX_Object_Label * pLabel=PX_Object_GetLabel(pObject);
 	if (pLabel)
@@ -714,7 +650,7 @@ px_void PX_Object_LabelRender(px_surface *psurface, PX_Object *pObject,px_uint e
 	}
 	
 
-	PX_SurfaceClear(psurface,(px_int)pObject->x,(px_int)pObject->y,(px_int)pObject->x+(px_int)pObject->Width-1,(px_int)pObject->y+(px_int)pObject->Height-1,pLabel->BackgroundColor);
+	PX_GeoDrawRect(psurface,(px_int)pObject->x,(px_int)pObject->y,(px_int)pObject->x+(px_int)pObject->Width-1,(px_int)pObject->y+(px_int)pObject->Height-1,pLabel->BackgroundColor);
 
 	if (pLabel->Border)
 	{
@@ -969,7 +905,7 @@ PX_Object_Image * PX_Object_GetImage( PX_Object *Object )
 		return PX_NULL;
 }
 
-px_void PX_Object_ImageSetAlign( PX_Object *pImage,px_uchar Align)
+px_void PX_Object_ImageSetAlign( PX_Object *pImage,px_dword Align)
 {
 	PX_Object_Image *Bitmap=PX_Object_GetImage(pImage);
 	if (Bitmap)
@@ -994,6 +930,12 @@ px_void PX_Object_ImageRender(px_surface *psurface, PX_Object *im,px_uint elpase
 	px_int x;
 	px_int y;
 	PX_Object_Image *pImage=PX_Object_GetImage(im);
+
+	if (!pImage->pTexture)
+	{
+		return;
+	}
+
 	x=(px_int)im->x;
 	y=(px_int)im->y;
 
@@ -1774,7 +1716,7 @@ px_void PX_Object_PushButtonOnMouseLButtonUp(PX_Object *Object,PX_Object_Event e
 
 
 
-PX_Object * PX_Object_PushButtonCreate(px_memorypool *mp,PX_Object *Parent,px_int x,px_int y,px_int Width,px_int Height,px_char *Text,px_color Color)
+PX_Object * PX_Object_PushButtonCreate(px_memorypool *mp,PX_Object *Parent,px_int x,px_int y,px_int Width,px_int Height,const px_char *Text,px_color Color)
 {
 	px_int TextLen;
 	PX_Object *pObject;
@@ -1824,7 +1766,8 @@ PX_Object * PX_Object_PushButtonCreate(px_memorypool *mp,PX_Object *Parent,px_in
 	pPushButton->Border=PX_TRUE;
 	pPushButton->style=PX_OBJECT_PUSHBUTTON_STYLE_RECT;
 	pPushButton->roundradius=PX_OBJECT_PUSHBUTTON_ROUNDRADIUS;
-
+	pPushButton->shape=PX_NULL;
+	pPushButton->Texture=PX_NULL;
 
 	PX_ObjectRegisterEvent(pObject,PX_OBJECT_EVENT_CURSORMOVE,PX_Object_PushButtonOnMouseMove,PX_NULL);
 	PX_ObjectRegisterEvent(pObject,PX_OBJECT_EVENT_CURSORDRAG,PX_Object_PushButtonOnMouseMove,PX_NULL);
@@ -1852,7 +1795,7 @@ px_char	  * PX_Object_PushButtonGetText( PX_Object *PushButton )
 	return PX_NULL;
 }
 
-px_void PX_Object_PushButtonSetText( PX_Object *pObject,px_char *Text )
+px_void PX_Object_PushButtonSetText( PX_Object *pObject,const px_char *Text )
 {
 	PX_Object_PushButton *pPushButton;
 	px_int TextLen;
@@ -1904,7 +1847,7 @@ px_void PX_Object_PushButtonSetTextColor( PX_Object *pObject,px_color Color )
 
 
 
-px_void PX_Object_PushButtonSetImage(PX_Object *pObject,px_texture *texture)
+px_void PX_Object_PushButtonSetTexture(PX_Object *pObject,px_texture *texture)
 {
 	PX_Object_PushButton * pPushButton=PX_Object_GetPushButton(pObject);
 	if (pPushButton)
@@ -1913,6 +1856,15 @@ px_void PX_Object_PushButtonSetImage(PX_Object *pObject,px_texture *texture)
 	}
 }
 
+
+px_void PX_Object_PushButtonSetShape(PX_Object *pObject,px_shape *pshape)
+{
+	PX_Object_PushButton * pPushButton=PX_Object_GetPushButton(pObject);
+	if (pPushButton)
+	{
+		pPushButton->shape=pshape;
+	}
+}
 
 px_void PX_Object_PushButtonSetBorderColor( PX_Object *pObject,px_color Color )
 {
@@ -1954,7 +1906,7 @@ px_void PX_Object_PushButtonSetPushColor(PX_Object *pObject,px_color Color)
 	}
 }
 
-px_void PX_Object_PushButtonSetAlign( PX_Object *pObject,px_uchar Align )
+px_void PX_Object_PushButtonSetAlign( PX_Object *pObject,px_dword Align )
 {
 	PX_Object_PushButton * pPushButton=PX_Object_GetPushButton(pObject);
 	if (pPushButton)
@@ -1963,7 +1915,7 @@ px_void PX_Object_PushButtonSetAlign( PX_Object *pObject,px_uchar Align )
 		pPushButton->Align=Align;
 	}
 }
-px_void PX_Object_PushButtonSetBorder( PX_Object *Object,px_uchar Border )
+px_void PX_Object_PushButtonSetBorder( PX_Object *Object,px_bool Border )
 {
 	PX_Object_PushButton *PushButton=PX_Object_GetPushButton(Object);
 	if (PushButton)
@@ -2077,6 +2029,10 @@ px_void PX_Object_PushButtonRender(px_surface *psurface, PX_Object *pObject,px_u
 	if (pPushButton->Texture)
 	{
 		PX_TextureRender(psurface,pPushButton->Texture,(px_int)pObject->x+(px_int)pObject->Width/2,(px_int)pObject->y+(px_int)pObject->Height/2,PX_TEXTURERENDER_REFPOINT_CENTER,PX_NULL);
+	}
+	else if (pPushButton->shape)
+	{
+		PX_ShapeRender(psurface,pPushButton->shape,(px_int)pObject->x+(px_int)pObject->Width/2,(px_int)pObject->y+(px_int)pObject->Height/2,PX_TEXTURERENDER_REFPOINT_CENTER,pPushButton->TextColor);
 	}
 
 	if (pPushButton->Border)
@@ -2342,7 +2298,7 @@ px_void PX_Object_EditSetMaxTextLength(PX_Object *pObject,px_int max_length)
 }
 
 
-px_void PX_Object_EditSetText( PX_Object *pObject,px_char *Text )
+px_void PX_Object_EditSetText( PX_Object *pObject,const px_char *Text )
 {
 	PX_Object_Edit *pEdit=PX_Object_GetEdit(pObject);
 	if(pEdit)
@@ -2421,7 +2377,16 @@ px_void PX_Object_EditSetTextColor(PX_Object *pObject,px_color Color)
 
 
 
-px_void PX_Object_EditSetBorder( PX_Object *pObj,px_uchar Border )
+px_void PX_Object_EditSetLimit(PX_Object *pObject,const px_char *Limit)
+{
+	PX_Object_Edit * pEdit=PX_Object_GetEdit(pObject);
+	if (pEdit)
+	{
+		pEdit->Limit=Limit;
+	}
+}
+
+px_void PX_Object_EditSetBorder( PX_Object *pObj,px_bool Border )
 {
 	PX_Object_Edit *pEdit=PX_Object_GetEdit(pObj);
 	if (pEdit)
@@ -2782,8 +2747,29 @@ px_void PX_Object_EditAddString(PX_Object *pObject,px_char *Text)
 		PX_Object_EditCheckCursor(pEdit);
 		while (*Text)
 		{
+
 			if(*Text!=8)
 			{
+				if (pEdit->Limit)
+				{
+					px_bool bMatch=PX_FALSE;
+					const px_char *limitFilter=pEdit->Limit;
+					while (*limitFilter)
+					{
+						if (*limitFilter==*Text)
+						{
+							bMatch=PX_TRUE;
+							break;
+						}
+						limitFilter++;
+					}
+					if (!bMatch)
+					{
+						Text++;
+						continue;
+					}
+				}
+
 				if (pEdit->max_length>0)
 				{
 					if (PX_StringLen(&pEdit->text)<pEdit->max_length)
@@ -2945,7 +2931,7 @@ px_void PX_Object_EditSetOffset(PX_Object *pObject,px_int TopOffset,px_int LeftO
 // 		return PX_NULL;
 // }
 // 
-// px_void PX_Object_StaticImageSetAlign( PX_Object *pImage,px_uchar Align)
+// px_void PX_Object_StaticImageSetAlign( PX_Object *pImage,px_dword Align)
 // {
 // 	PX_Object_StaticImage *Bitmap=PX_Object_GetStaticImage(pImage);
 // 	if (Bitmap)
@@ -3199,7 +3185,7 @@ px_void PX_Object_ScrollAreaSetBkColor(PX_Object *pObj,px_color bkColor)
 }
 
 
-px_void PX_Object_ScrollAreaSetBorder(PX_Object *pObj,px_uchar Border)
+px_void PX_Object_ScrollAreaSetBorder(PX_Object *pObj,px_bool Border)
 {
 	PX_Object_ScrollArea *pSA;
 	pSA=PX_Object_GetScrollArea(pObj);
@@ -3426,7 +3412,7 @@ px_void PX_Object_AutoTextSetTextColor(PX_Object *pObject,px_color Color)
 }
 
 
-px_void PX_Object_AutoTextSetText(PX_Object *Obj,px_char *Text)
+px_void PX_Object_AutoTextSetText(PX_Object *Obj,const px_char *Text)
 {
 	PX_Object_AutoText * pAt=PX_Object_GetAutoText(Obj);
 	if (!pAt)
@@ -3438,7 +3424,7 @@ px_void PX_Object_AutoTextSetText(PX_Object *Obj,px_char *Text)
 	Obj->Height=(px_float)PX_Object_AutoTextGetHeight(Obj);
 }
 
-PX_Object * PX_Object_AnimationCreate(px_memorypool *mp,PX_Object *Parent,px_int x,px_int y,px_animationlibrary *lib)
+PX_Object * PX_Object_AnimationCreate(px_memorypool *mp,PX_Object *Parent,px_int x,px_int y,PX_Animationlibrary *lib)
 {
 	PX_Object *pObject;
 	PX_Object_Animation *pAnimation=(PX_Object_Animation *)MP_Malloc(mp,sizeof(PX_Object_Animation));
@@ -3465,7 +3451,7 @@ PX_Object * PX_Object_AnimationCreate(px_memorypool *mp,PX_Object *Parent,px_int
 	return pObject;
 }
 
-px_void PX_Object_AnimationSetLibrary(PX_Object *Object,px_animationlibrary *lib)
+px_void PX_Object_AnimationSetLibrary(PX_Object *Object,PX_Animationlibrary *lib)
 {
 	PX_Object_Animation *pA=PX_Object_GetAnimation(Object);
 	if (pA)
@@ -3482,7 +3468,7 @@ PX_Object_Animation * PX_Object_GetAnimation(PX_Object *Object)
 		return PX_NULL;
 }
 
-px_void PX_Object_AnimationSetAlign(PX_Object *panimation,px_uchar Align)
+px_void PX_Object_AnimationSetAlign(PX_Object *panimation,px_dword Align)
 {
 	PX_Object_Animation *pA=PX_Object_GetAnimation(panimation);
 	if (pA)
@@ -3796,7 +3782,7 @@ PX_Object_Shape * PX_Object_GetShape( PX_Object *Object )
 		return PX_NULL;
 }
 
-px_void PX_Object_ShapeSetAlign( PX_Object *pShape,px_uchar Align)
+px_void PX_Object_ShapeSetAlign( PX_Object *pShape,px_dword Align)
 {
 	PX_Object_Shape *Bitmap=PX_Object_GetShape(pShape);
 	if (Bitmap)
@@ -3887,20 +3873,20 @@ px_void PX_Object_CursorButtonRender(px_surface *psurface, PX_Object *pObject,px
 	alpha=(px_uchar)(PX_ABS(pcb->c_distance-pcb->c_distance_far)/PX_ABS(pcb->c_distance_far-pcb->c_distance_near)*255);
 	pcb->c_color._argb.a=alpha;
 	//left top
-	_x=pObject->x-pcb->c_distance;
-	_y=pObject->y-pcb->c_distance;
+	_x=pObject->x-pcb->c_distance-1;
+	_y=pObject->y-pcb->c_distance-1;
 	PX_GeoDrawRect(psurface,(px_int)_x,(px_int)_y,(px_int)(_x+w),(px_int)_y+pcb->c_width,pcb->c_color);
 	PX_GeoDrawRect(psurface,(px_int)_x,(px_int)_y+pcb->c_width+1,(px_int)_x+pcb->c_width,(px_int)(_y+h),pcb->c_color);
 
 	//left bottom
-	_x=pObject->x-pcb->c_distance;
+	_x=pObject->x-pcb->c_distance-1;
 	_y=pObject->y+pObject->Height+pcb->c_distance;
 	PX_GeoDrawRect(psurface,(px_int)_x,(px_int)_y,(px_int)(_x+w),(px_int)_y-pcb->c_width,pcb->c_color);
 	PX_GeoDrawRect(psurface,(px_int)_x,(px_int)_y-pcb->c_width-1,(px_int)_x+pcb->c_width,(px_int)(_y-h),pcb->c_color);
 
 	//right top
 	_x=pObject->x+pObject->Width+pcb->c_distance;
-	_y=pObject->y-pcb->c_distance;
+	_y=pObject->y-pcb->c_distance-1;
 	PX_GeoDrawRect(psurface,(px_int)_x,(px_int)_y,(px_int)(_x-w),(px_int)_y+pcb->c_width,pcb->c_color);
 	PX_GeoDrawRect(psurface,(px_int)_x,(px_int)_y+pcb->c_width+1,(px_int)_x-pcb->c_width,(px_int)(_y+h),pcb->c_color);
 
@@ -3943,7 +3929,7 @@ px_void PX_Object_CursorButtonOnMouseMove(PX_Object *Object,PX_Object_Event e,px
 
 
 
-PX_Object *PX_Object_CursorButtonCreate(px_memorypool *mp,PX_Object *Parent,px_int x,px_int y,px_int Width,px_int Height,px_char *Text,px_color Color)
+PX_Object *PX_Object_CursorButtonCreate(px_memorypool *mp,PX_Object *Parent,px_int x,px_int y,px_int Width,px_int Height,const px_char *Text,px_color Color)
 {
 	PX_Object *pObject;
 	PX_Object_CursorButton *pCb=(PX_Object_CursorButton *)MP_Malloc(mp,sizeof(PX_Object_CursorButton));
@@ -6209,8 +6195,6 @@ px_void PX_Object_CoordinatesRender(px_surface *psurface, PX_Object *pObject,px_
 	if(pcd->ShowGuides)
 		PX_Object_CoordinatesDrawDashed(psurface,pObject);
 
-	PX_Object_CoordinatesDrawFlagLine(psurface,pObject);
-
 	if(pcd->HorizontalShow)
 		PX_Object_CoordinatesDrawFlagText(psurface,pObject);
 
@@ -6225,6 +6209,7 @@ px_void PX_Object_CoordinatesRender(px_surface *psurface, PX_Object *pObject,px_
 
 	PX_Object_CoordinatesDrawHelpLine(psurface,pObject);
 
+	PX_Object_CoordinatesDrawFlagLine(psurface,pObject);
 }
 
 px_void PX_Object_CoordinatesFree(PX_Object *pObject)
@@ -6537,9 +6522,18 @@ static px_void PX_Object_FilterEditorDrawHelpLine(px_surface *psurface,PX_Object
 		//line
 		PX_GeoDrawLine(psurface,(px_int)(oftx),(px_int)(ofty+y),(px_int)(oftx+pObject->Width),(px_int)(ofty+y),1,pfe->helpLineColor);
 		val=(midy-y)/(pObject->Height/2)*pfe->rangedb;
-		PX_sprintf1(text,sizeof(text),"+%1.2db",PX_STRINGFORMAT_FLOAT((px_float)val));
+		switch (pfe->FilterType)
+		{
+		case PX_OBJECT_FILTER_TYPE_dB:
+			PX_sprintf1(text,sizeof(text),"+%1.2db",PX_STRINGFORMAT_FLOAT((px_float)val));
+			break;
+		case PX_OBJECT_FILTER_TYPE_Liner:
+			PX_sprintf1(text,sizeof(text),"+%1.2",PX_STRINGFORMAT_FLOAT((px_float)val));
+			break;
+		}
+		
 		//text
-		PX_FontDrawText(psurface,(px_int)(oftx-1),(px_int)(ofty+y-6),text,pfe->FontColor,PX_FONT_ALIGN_XRIGHT);
+		PX_FontDrawText(psurface,(px_int)(oftx-1),(px_int)(ofty+y-5),text,pfe->FontColor,PX_FONT_ALIGN_XRIGHT);
 	}
 	//down
 	for (y=midy;y<=pObject->Height;y+=incy)
@@ -6547,9 +6541,17 @@ static px_void PX_Object_FilterEditorDrawHelpLine(px_surface *psurface,PX_Object
 		//line
 		PX_GeoDrawLine(psurface,(px_int)(oftx),(px_int)(ofty+y),(px_int)(oftx+pObject->Width),(px_int)(ofty+y),1,pfe->helpLineColor);
 		val=(midy-y)/(pObject->Height/2)*pfe->rangedb;
-		PX_sprintf1(text,sizeof(text),"%1.2db",PX_STRINGFORMAT_FLOAT((px_float)val));
+		switch (pfe->FilterType)
+		{
+		case PX_OBJECT_FILTER_TYPE_dB:
+			PX_sprintf1(text,sizeof(text),"%1.2db",PX_STRINGFORMAT_FLOAT((px_float)val));
+			break;
+		case PX_OBJECT_FILTER_TYPE_Liner:
+			PX_sprintf1(text,sizeof(text),"%1.2",PX_STRINGFORMAT_FLOAT((px_float)val));
+			break;
+		}
 		//text
-		PX_FontDrawText(psurface,(px_int)(oftx-1),(px_int)(ofty+y-6),text,pfe->FontColor,PX_FONT_ALIGN_XRIGHT);
+		PX_FontDrawText(psurface,(px_int)(oftx-1),(px_int)(ofty+y-5),text,pfe->FontColor,PX_FONT_ALIGN_XRIGHT);
 	}
 
 	//horizontal
@@ -6560,8 +6562,11 @@ static px_void PX_Object_FilterEditorDrawHelpLine(px_surface *psurface,PX_Object
 		PX_GeoDrawLine(psurface,(px_int)(oftx+x),(px_int)(ofty+0),(px_int)(oftx+x),(px_int)(ofty+pObject->Height-1),1,pfe->helpLineColor);
 		val=x/pObject->Width;
 		//text
-		PX_sprintf1(text,sizeof(text),"%1.2",PX_STRINGFORMAT_FLOAT((px_float)val));
-		PX_FontDrawText(psurface,(px_int)(oftx+x-1),(px_int)(ofty+pObject->Height+3),text,pfe->FontColor,PX_FONT_ALIGN_XCENTER);
+		if (pfe->showHorizontal)
+		{
+			PX_sprintf1(text,sizeof(text),"%1.2",PX_STRINGFORMAT_FLOAT((px_float)val));
+			PX_FontDrawText(psurface,(px_int)(oftx+x-1),(px_int)(ofty+pObject->Height+3),text,pfe->FontColor,PX_FONT_ALIGN_XCENTER);
+		}
 	}
 
 }
@@ -6753,6 +6758,24 @@ px_void PX_Object_FilterEditorSetOperateCount(PX_Object *pObject,px_int count)
 	pfe->opCount=count;
 }
 
+px_void PX_Object_FilterEditorSetType(PX_Object *Object,PX_OBJECT_FILTER_TYPE type)
+{
+	PX_Object_FilterEditor *pfe=PX_Object_GetFilterEditor(Object);
+	if (pfe)
+	{
+		pfe->FilterType=type;
+	}
+}
+
+px_void PX_Object_FilterEditorSetHorizontalShow(PX_Object *Object,px_bool HorizontalShow)
+{
+	PX_Object_FilterEditor *pfe=PX_Object_GetFilterEditor(Object);
+	if (pfe)
+	{
+		pfe->showHorizontal=HorizontalShow;
+	}
+}
+
 px_void PX_Object_FilterEditorReset(PX_Object *Object)
 {
 	px_int i,y;
@@ -6860,7 +6883,14 @@ px_void PX_Object_FilterEditorMapData(PX_Object *Object,px_double data[],px_int 
 		d2=ptValue[mapIndex+1];
 		d1=ptValue[mapIndex];
 		dm=d1+frac*(d2-d1);
-		dm=PX_pow_dd(10,dm/20.0);
+		switch(pfe->FilterType)
+		{
+		case PX_OBJECT_FILTER_TYPE_dB:
+			dm=PX_pow_dd(10,dm/20.0);
+			break;
+		case PX_OBJECT_FILTER_TYPE_Liner:
+			break;
+		}
 		data[i]=dm;
 	}
 }
@@ -6885,17 +6915,23 @@ px_double PX_Object_FilterEditorMapValue(PX_Object *Object,px_double precent)
 	d2=((Object->Height/2)-pfe->pt[mapIndex+1].y)/(Object->Height/2)*pfe->rangedb;
 	d1=((Object->Height/2)-pfe->pt[mapIndex].y)/(Object->Height/2)*pfe->rangedb;
 	dm=d1+frac*(d2-d1);
-	dm=PX_pow_dd(10,dm/20.0);
-
+	switch(pfe->FilterType)
+	{
+	case PX_OBJECT_FILTER_TYPE_dB:
+		dm=PX_pow_dd(10,dm/20.0);
+		break;
+	case PX_OBJECT_FILTER_TYPE_Liner:
+		break;
+	}
 	return dm;
 }
 
-PX_Object * PX_Object_FilterEditorCreate(px_memorypool *mp, PX_Object *Parent,px_int x,px_int y,px_int Width,px_int Height)
+PX_Object * PX_Object_FilterEditorCreate(px_memorypool *mp, PX_Object *Parent,px_int x,px_int y,px_int Width,px_int Height,PX_OBJECT_FILTER_TYPE type)
 {
 	PX_Object *pObject;
 	PX_Object_FilterEditor FilterEditor;
 	PX_memset(&FilterEditor,0,sizeof(FilterEditor));
-
+	FilterEditor.showHorizontal=PX_TRUE;
 	FilterEditor.borderColor=PX_COLOR(255,0,0,0);
 	FilterEditor.FontColor=PX_COLOR(255,0,0,0);
 	FilterEditor.bSelectDrag=PX_FALSE;
@@ -6908,6 +6944,8 @@ PX_Object * PX_Object_FilterEditorCreate(px_memorypool *mp, PX_Object *Parent,px
 	FilterEditor.HorizontalDividing=16;
 	FilterEditor.VerticalDividing=16;
 	FilterEditor.ShowHelpLine=PX_TRUE;
+	FilterEditor.showHorizontal=PX_FALSE;
+	FilterEditor.FilterType=type;
 	FilterEditor.rangedb=6;
 	FilterEditor.radius=PX_OBJECT_FILTER_EDITOR_DEFAULT_RADIUS;
 	pObject=PX_ObjectCreateEx(mp,Parent,(px_float)x,(px_float)y,0,(px_float)Width,(px_float)Height,0,PX_OBJECT_TYPE_FILTEREDITOR,PX_NULL,PX_Object_FilterEditorRender,PX_NULL,&FilterEditor,sizeof(PX_Object_FilterEditor));
@@ -6920,5 +6958,252 @@ PX_Object * PX_Object_FilterEditorCreate(px_memorypool *mp, PX_Object *Parent,px
 	return pObject;
 }
 
+px_void PX_Object_FilterEditorSetborderColor(PX_Object *Object,px_color clr)
+{
+	PX_Object_FilterEditor *pfe=PX_Object_GetFilterEditor(Object);
+	pfe->borderColor=clr;
+}
 
+
+
+px_void PX_Object_FilterEditorSetptColor(PX_Object *Object,px_color clr)
+{
+	PX_Object_FilterEditor *pfe=PX_Object_GetFilterEditor(Object);
+	pfe->ptColor=clr;
+}
+
+
+PX_Object_CheckBox * PX_Object_GetCheckBox(PX_Object *Object)
+{
+	PX_Object_CheckBox *pcb=(PX_Object_CheckBox *)Object->pObject;
+	if (Object->Type==PX_OBJECT_TYPE_CHECKBOX)
+	{
+		return pcb;
+	}
+	return PX_NULL;
+}
+
+
+px_void PX_Object_CheckBoxOnMouseMove(PX_Object *Object,PX_Object_Event e,px_void *user_ptr)
+{
+	PX_Object_CheckBox *pcb=PX_Object_GetCheckBox(Object);
+	px_int x,y;
+	x=e.Param_int[0];
+	y=e.Param_int[1];
+
+	if (pcb)
+	{
+		if(PX_ObjectIsPointInRegion(Object,(px_float)x,(px_float)y))
+		{
+			if (pcb->state!=PX_OBJECT_BUTTON_STATE_ONPUSH)
+			{
+				if (pcb->state!=PX_OBJECT_BUTTON_STATE_ONCURSOR)
+				{
+					PX_Object_Event e;
+					e.Event=PX_OBJECT_EVENT_CURSOROVER;
+					e.Param_uint[0]=0;
+					e.Param_uint[1]=0;
+					e.Param_uint[2]=0;
+					e.Param_uint[3]=0;
+					e.Param_ptr[0]=PX_NULL;
+					PX_ObjectExecuteEvent(Object,e);
+				}
+				pcb->state=PX_OBJECT_CHECKBOX_STATE_ONCURSOR;
+			}
+		}
+		else
+		{
+			if (pcb->state!=PX_OBJECT_BUTTON_STATE_NORMAL)
+			{
+				PX_Object_Event e;
+				e.Event=PX_OBJECT_EVENT_CURSOROUT;
+				e.Param_uint[0]=0;
+				e.Param_uint[1]=0;
+				e.Param_uint[2]=0;
+				e.Param_uint[3]=0;
+				PX_ObjectExecuteEvent(Object,e);
+			}
+			pcb->state=PX_OBJECT_CHECKBOX_STATE_NORMAL;
+		}
+	}
+}
+
+px_void PX_Object_CheckBoxOnMouseLButtonDown(PX_Object *Object,PX_Object_Event e,px_void *user_ptr)
+{
+	PX_Object_CheckBox *pcb=PX_Object_GetCheckBox(Object);
+	px_int x,y;
+
+	x=e.Param_int[0];
+	y=e.Param_int[1];
+
+	if (pcb)
+	{
+		if(PX_ObjectIsPointInRegion(Object,(px_float)x,(px_float)y))
+			pcb->state=PX_OBJECT_CHECKBOX_STATE_ONPUSH;
+	}
+}
+
+px_void PX_Object_CheckBoxOnMouseLButtonUp(PX_Object *Object,PX_Object_Event e,px_void *user_ptr)
+{
+	PX_Object_CheckBox *pcb=PX_Object_GetCheckBox(Object);
+
+	px_int x,y;
+
+	x=e.Param_uint[0];
+	y=e.Param_uint[1];
+
+	if (pcb)
+	{
+		if(PX_ObjectIsPointInRegion(Object,(px_float)x,(px_float)y))
+			if(pcb->state==PX_OBJECT_CHECKBOX_STATE_ONPUSH)
+			{
+				pcb->state=PX_OBJECT_CHECKBOX_STATE_ONCURSOR;
+				pcb->bCheck=!pcb->bCheck;
+			}
+	}
+}
+
+px_void PX_Object_CheckBoxRender(px_surface *psurface, PX_Object *pObject,px_uint elpased)
+{
+	px_int TextLen,i;
+	px_int fx,fy;
+	PX_Object_CheckBox *pcb=PX_Object_GetCheckBox(pObject);
+
+	if (pcb==PX_NULL)
+	{
+		return;
+	}
+
+	if (!pObject->Visible)
+	{
+		return;
+	}
+
+	TextLen=0;
+	for (i=0;i<PX_strlen(pcb->Text);i++)
+	{
+		if (pcb->Text[i]&0x80)
+		{
+			TextLen+=__PX_FONT_GBKSIZE;
+			i++;
+			continue;
+		}
+		else
+		{
+			TextLen+=__PX_FONT_ASCSIZE;
+		}
+	}
+
+	if (pcb->Align&PX_OBJECT_ALIGN_HCENTER)
+	{
+		fx=(px_int)pObject->x;
+		fx=fx+((px_int)pObject->Width-TextLen)/2;
+	}
+
+	if (pcb->Align&PX_OBJECT_ALIGN_VCENTER)
+	{
+		fy=(px_int)pObject->y;
+		fy=fy+((px_int)pObject->Height-__PX_FONT_HEIGHT)/2;
+	}
+
+
+	if (pcb->Align&PX_OBJECT_ALIGN_LEFT)
+	{
+		fx=(px_int)pObject->x+18;
+	}
+
+	if (pcb->Align&PX_OBJECT_ALIGN_RIGHT)
+	{
+		fx=(px_int)pObject->x+(px_int)pObject->Width-TextLen;
+	}
+
+	if (pcb->Align&PX_OBJECT_ALIGN_TOP)
+	{
+		fy=(px_int)pObject->y;
+	}
+
+	if (pcb->Align&PX_OBJECT_ALIGN_BOTTOM)
+	{
+		fy=(px_int)pObject->y+(px_int)pObject->Height-__PX_FONT_HEIGHT;
+	}
+
+	PX_GeoDrawRect(psurface,(px_int)pObject->x,(px_int)pObject->y,(px_int)pObject->x+(px_int)pObject->Width-1,(px_int)pObject->y+(px_int)pObject->Height-1,pcb->BackgroundColor);
+	switch (pcb->state)
+	{
+	case PX_OBJECT_BUTTON_STATE_NORMAL:
+		PX_GeoDrawRect(psurface,(px_int)pObject->x,(px_int)pObject->y,(px_int)pObject->x+(px_int)pObject->Width-1,(px_int)pObject->y+(px_int)pObject->Height-1,pcb->BackgroundColor);
+		break;
+	case PX_OBJECT_BUTTON_STATE_ONPUSH:
+		PX_GeoDrawRect(psurface,(px_int)pObject->x,(px_int)pObject->y,(px_int)pObject->x+(px_int)pObject->Width-1,(px_int)pObject->y+(px_int)pObject->Height-1,pcb->PushColor);
+		break;
+	case PX_OBJECT_BUTTON_STATE_ONCURSOR:
+		PX_GeoDrawRect(psurface,(px_int)pObject->x,(px_int)pObject->y,(px_int)pObject->x+(px_int)pObject->Width-1,(px_int)pObject->y+(px_int)pObject->Height-1,pcb->CursorColor);
+		break;
+	}
+
+	if (pcb->Border)
+	{
+		PX_GeoDrawBorder(psurface,(px_int)pObject->x,(px_int)pObject->y,(px_int)pObject->x+(px_int)pObject->Width-1,(px_int)pObject->y+(px_int)pObject->Height-1,1,pcb->BorderColor);
+	}
+
+	PX_FontDrawText(psurface,fx,fy,pcb->Text,pcb->TextColor,PX_FONT_ALIGN_XLEFT);
+
+	//draw CheckState
+	PX_GeoDrawBorder(psurface,(px_int)pObject->x+1,(px_int)pObject->y+1,(px_int)pObject->x+14,(px_int)pObject->y+14,1,pcb->BorderColor);
+	if (pcb->bCheck)
+	{
+		PX_GeoDrawRect(psurface,(px_int)pObject->x+3,(px_int)pObject->y+3,(px_int)pObject->x+12,(px_int)pObject->y+12,pcb->BorderColor);
+	}
+
+}
+
+PX_Object * PX_Object_CheckBoxCreate(px_memorypool *mp, PX_Object *Parent,px_int x,px_int y,px_int Width,px_int Height,const char text[])
+{
+	PX_Object *pObject;
+	PX_Object_CheckBox cbx;
+	cbx.Align=PX_OBJECT_ALIGN_VCENTER|PX_OBJECT_ALIGN_LEFT;
+	cbx.BackgroundColor=PX_COLOR(0,0,0,0);
+	cbx.bCheck=PX_FALSE;
+	cbx.Border=PX_FALSE;
+	cbx.BorderColor=PX_COLOR(255,0,0,0);
+	cbx.CursorColor=PX_COLOR(255,204,204,204);
+	cbx.PushColor=PX_COLOR(255,192,192,192);
+	cbx.state=PX_OBJECT_CHECKBOX_STATE_NORMAL;
+	PX_strset(cbx.Text,text);
+	cbx.TextColor=PX_COLOR(255,0,0,0);
+	pObject=PX_ObjectCreateEx(mp,Parent,(px_float)x,(px_float)y,0,(px_float)Width,(px_float)Height,0,PX_OBJECT_TYPE_CHECKBOX,PX_NULL,PX_Object_CheckBoxRender,PX_NULL,&cbx,sizeof(cbx));
+	if (!pObject)
+	{
+		return PX_NULL;
+	}
+	PX_ObjectRegisterEvent(pObject,PX_OBJECT_EVENT_CURSORMOVE,PX_Object_CheckBoxOnMouseMove,PX_NULL);
+	PX_ObjectRegisterEvent(pObject,PX_OBJECT_EVENT_CURSORDOWN,PX_Object_CheckBoxOnMouseLButtonDown,PX_NULL);
+	PX_ObjectRegisterEvent(pObject,PX_OBJECT_EVENT_CURSORUP,PX_Object_CheckBoxOnMouseLButtonUp,PX_NULL);
+	return pObject;
+}
+
+px_void PX_Object_CheckBoxSetBackgroundColor(PX_Object *Object,px_color clr)
+{
+	PX_Object_GetCheckBox(Object)->BackgroundColor=clr;
+}
+
+px_void PX_Object_CheckBoxSetBorderColor(PX_Object *Object,px_color clr)
+{
+	PX_Object_GetCheckBox(Object)->BorderColor=clr;
+}
+
+px_void PX_Object_CheckBoxSetPushColor(PX_Object *Object,px_color clr)
+{
+	PX_Object_GetCheckBox(Object)->PushColor=clr;
+}
+
+px_void PX_Object_CheckBoxSetCursorColor(PX_Object *Object,px_color clr)
+{
+	PX_Object_GetCheckBox(Object)->CursorColor=clr;
+}
+
+px_void PX_Object_CheckBoxSetTextColor(PX_Object *Object,px_color clr)
+{
+	PX_Object_GetCheckBox(Object)->TextColor=clr;
+}
 

@@ -18,6 +18,10 @@ px_bool PX_SurfaceCreate(px_memorypool *mp,px_uint width,px_uint height,px_surfa
 px_void PX_SurfaceFree(px_surface *psurface)
 {
 	MP_Free(psurface->MP,psurface->surfaceBuffer);
+	psurface->surfaceBuffer=PX_NULL;
+	psurface->MP=0;
+	psurface->height=0;
+	psurface->width=0;
 }
 
 px_void PX_SurfaceDrawPixel(px_surface *psurface,px_int X,px_int Y,px_color COLOR)

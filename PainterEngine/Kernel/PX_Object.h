@@ -57,6 +57,7 @@ enum PX_OBJECT_TYPE
   PX_OBJECT_TYPE_VKEYBOARD		,
   PX_OBJECT_TYPE_COORDINATE     ,
   PX_OBJECT_TYPE_FILTEREDITOR   ,
+  PX_OBJECT_TYPE_CHECKBOX		,
 };
 
 
@@ -127,9 +128,7 @@ enum PX_OBJECT_SLIDERBAR_STATUS
 #define  PX_OBJECT_COORDINATES_DEFAULT_FLOAT_FLAGFORMAT_R		 "%1.2"
 #define  PX_OBJECT_COORDINATES_DEFAULT_INT_FLAGFORMAT_R			 "%1"
 
-#define  PX_OBJECT_COORDINATEFLAGLINE_XSHOW						 1
-#define  PX_OBJECT_COORDINATEFLAGLINE_YLSHOW					 2
-#define  PX_OBJECT_COORDINATEFLAGLINE_YRSHOW					 4
+
 
 
 
@@ -189,7 +188,7 @@ struct _PX_Object
 //////////////////////////////////////////////////////////////////////////
 typedef struct  
 {
-	px_uchar Align;
+	px_dword Align;
 	px_bool  Border;
 	px_color TextColor;
 	px_color BackgroundColor;
@@ -214,14 +213,14 @@ typedef struct
 
 typedef struct 
 {
-	px_uchar Align;
+	px_dword Align;
 	px_texture *pTexture;
 	px_texture *pmask;
 }PX_Object_Image;
 
 typedef struct 
 {
-	px_uchar Align;
+	px_dword Align;
 	px_color blendcolor;
 	px_shape *pShape;
 }PX_Object_Shape;
@@ -250,7 +249,7 @@ typedef struct
 
 typedef struct 
 {
-	px_uchar Align;
+	px_dword Align;
 	px_texture Texture;
 }PX_Object_StaticImage;
 
@@ -304,8 +303,8 @@ typedef enum
 
 typedef struct 
 {
-	px_uchar Align;
-	px_uchar Border;
+	px_dword Align;
+	px_bool Border;
 	px_color TextColor;
 	px_color BorderColor;
 	px_color BackgroundColor;
@@ -313,6 +312,7 @@ typedef struct
 	px_color PushColor;
 	px_char *Text;
 	px_texture *Texture;
+	px_shape *shape;
 	px_float roundradius;
 	PX_OBJECT_PUSHBUTTON_STYLE style;
 	PX_Object_PUSHBUTTON_STATE state;
@@ -347,7 +347,7 @@ typedef struct
 {
 	px_string text;
 	px_bool onFocus;
-	px_uchar Border;
+	px_bool Border;
 	px_color TextColor;
 	px_color BorderColor;
 	px_color CursorColor;
@@ -361,6 +361,7 @@ typedef struct
 	px_int cursor_index;
 	px_int max_length;
 	px_surface EditSurface;
+	const px_char *Limit;
 	PX_OBJECT_EDIT_STATE state;
 }PX_Object_Edit;
 
@@ -378,8 +379,8 @@ typedef struct
 
 typedef struct 
 {
-	px_uchar Align;
-	px_animation animation;
+	px_dword Align;
+	PX_Animation animation;
 }PX_Object_Animation;
 
 typedef struct 
@@ -494,13 +495,13 @@ px_void PX_ObjectExecuteEvent(PX_Object *pPost,PX_Object_Event Event);
 
 
 
-PX_Object *	PX_Object_LabelCreate(px_memorypool *mp,PX_Object *Parent,px_int x,px_int y,px_int Width,px_int Height,px_char *Text,px_color Color);
+PX_Object *	PX_Object_LabelCreate(px_memorypool *mp,PX_Object *Parent,px_int x,px_int y,px_int Width,px_int Height,const px_char *Text,px_color Color);
 PX_Object_Label  *	PX_Object_GetLabel(PX_Object *Object);
 px_char	  * PX_Object_LabelGetText(PX_Object *Label);
 px_void		PX_Object_LabelSetText(PX_Object *pLabel,px_char *Text);
 px_void		PX_Object_LabelSetTextColor(PX_Object *pLabel,px_color Color);
 px_void		PX_Object_LabelSetBackgroundColor(PX_Object *pLabel,px_color Color);
-px_void		PX_Object_LabelSetAlign(PX_Object *pLabel,px_uchar Align);
+px_void		PX_Object_LabelSetAlign(PX_Object *pLabel,px_dword Align);
 px_void		PX_Object_LabelSetBorder(PX_Object *pLabel,px_bool Border);
 px_void		PX_Object_LabelRender(px_surface *psurface,PX_Object *pLabel,px_uint elpased);    
 px_void		PX_Object_LabelFree(PX_Object *pLabel);
@@ -522,7 +523,7 @@ px_void     PX_Object_RadiusICOFree(PX_Object *pRadiusICO);
 
 PX_Object *PX_Object_ImageCreate(px_memorypool *mp,PX_Object *Parent,px_int x,px_int y,px_texture *ptex);
 PX_Object_Image *PX_Object_GetImage(PX_Object *Object);
-px_void	   PX_Object_ImageSetAlign(PX_Object *pImage,px_uchar Align);
+px_void	   PX_Object_ImageSetAlign(PX_Object *pImage,px_dword Align);
 px_void	   PX_Object_ImageSetMask(PX_Object *pImage,px_texture *pmask);
 px_void	   PX_Object_ImageRender(px_surface *psurface,PX_Object *pImage,px_uint elpased);
 px_void	   PX_Object_ImageFree(PX_Object *pImage);
@@ -542,34 +543,36 @@ px_void	   PX_Object_SliderBarSetSliderButtonLength(PX_Object *pSliderBar,px_int
 
 
 
-PX_Object *PX_Object_PushButtonCreate(px_memorypool *mp,PX_Object *Parent,px_int x,px_int y,px_int Width,px_int Height,px_char *Text,px_color Color);
+PX_Object *PX_Object_PushButtonCreate(px_memorypool *mp,PX_Object *Parent,px_int x,px_int y,px_int Width,px_int Height,const px_char *Text,px_color Color);
 PX_Object_PushButton * PX_Object_GetPushButton( PX_Object *Object );
 px_char * PX_Object_PushButtonGetText( PX_Object *PushButton );
-px_void PX_Object_PushButtonSetText( PX_Object *pObject,px_char *Text );
+px_void PX_Object_PushButtonSetText( PX_Object *pObject,const px_char *Text );
 px_void PX_Object_PushButtonSetBackgroundColor( PX_Object *pObject,px_color Color );
 px_void PX_Object_PushButtonSetCursorColor( PX_Object *pObject,px_color Color );
 px_void PX_Object_PushButtonSetStyle(PX_Object *pObject,PX_OBJECT_PUSHBUTTON_STYLE style);
 px_void PX_Object_PushButtonSetPushColor( PX_Object *pObject,px_color Color );
 px_void PX_Object_PushButtonSetBorderColor( PX_Object *pObject,px_color Color );
-px_void PX_Object_PushButtonSetAlign( PX_Object *pObject,px_uchar Align );
-px_void PX_Object_PushButtonSetBorder( PX_Object *Object,px_uchar Border );
+px_void PX_Object_PushButtonSetAlign( PX_Object *pObject,px_dword Align );
+px_void PX_Object_PushButtonSetBorder( PX_Object *Object,px_bool Border );
 px_void PX_Object_PushButtonRender(px_surface *psurface, PX_Object *pObject,px_uint elpased);
 px_void PX_Object_PushButtonSetTextColor( PX_Object *pObject,px_color Color );
-px_void PX_Object_PushButtonSetImage(PX_Object *pObject,px_texture *texture);
+px_void PX_Object_PushButtonSetTexture(PX_Object *pObject,px_texture *texture);
+px_void PX_Object_PushButtonSetShape(PX_Object *pObject,px_shape *pshape);
 px_void PX_Object_PushButtonFree( PX_Object *Obj );
 
 PX_Object* PX_Object_EditCreate(px_memorypool *mp, PX_Object *Parent,px_int x,px_int y,px_int Width,px_int Height,px_color TextColor );
 PX_Object_Edit * PX_Object_GetEdit( PX_Object *Object );
 px_char * PX_Object_EditGetText( PX_Object *pObject );
 px_void PX_Object_EditSetMaxTextLength(PX_Object *pObject,px_int max_length);
-px_void PX_Object_EditSetText( PX_Object *pObject,px_char *Text );
+px_void PX_Object_EditSetText( PX_Object *pObject,const px_char *Text );
 px_void PX_Object_EditSetFocus( PX_Object *pObject,px_bool OnFocus);
 px_void PX_Object_EditSetPasswordStyle( PX_Object *pObject,px_uchar Enabled );
 px_void PX_Object_EditSetBackgroundColor( PX_Object *pObject,px_color Color );
 px_void PX_Object_EditSetBorderColor( PX_Object *pObject,px_color Color );
 px_void PX_Object_EditSetCursorColor( PX_Object *pObject,px_color Color );
 px_void PX_Object_EditSetTextColor( PX_Object *pObject,px_color Color );
-px_void PX_Object_EditSetBorder( PX_Object *pObj,px_uchar Border );
+px_void PX_Object_EditSetLimit(PX_Object *pObject,const px_char *Limit);
+px_void PX_Object_EditSetBorder( PX_Object *pObj,px_bool Border );
 px_void PX_Object_EditRender(px_surface *psurface, PX_Object *pObject,px_uint elpased);
 px_void PX_Object_EditFree( PX_Object *pObject );
 px_void PX_Object_EditAddString(PX_Object *pObject,px_char *Text);
@@ -581,7 +584,7 @@ px_void PX_Object_EditCursorForward(PX_Object *pObject);
 
 // PX_Object * PX_Object_StaticImageCreate( PX_Object *Parent,px_int x,px_int y,px_texture tex);
 // PX_Object_StaticImage * PX_Object_GetStaticImage( PX_Object *Object );
-// px_void PX_Object_StaticImageSetAlign( PX_Object *pImage,px_uchar Align);
+// px_void PX_Object_StaticImageSetAlign( PX_Object *pImage,px_dword Align);
 // px_void PX_Object_StaticImageRender(px_surface *psurface, PX_Object *im,px_uint elpased);
 // px_void PX_Object_StaticImageFree(PX_Object *pObj);
 
@@ -594,7 +597,7 @@ px_void PX_Object_ScrollAreaMoveToTop(PX_Object *pObject);
 px_void PX_Object_ScrollAreaGetWidthHeight(PX_Object *pObject,px_int *Width,px_int *Height);
 px_void PX_Object_ScrollAreaRender(px_surface *psurface, PX_Object *pObject,px_uint elpased);
 px_void PX_Object_ScrollAreaSetBkColor(PX_Object *pObj,px_color bkColor);
-px_void PX_Object_ScrollAreaSetBorder( PX_Object *pObj,px_uchar Border );
+px_void PX_Object_ScrollAreaSetBorder( PX_Object *pObj,px_bool Border );
 px_void PX_Object_ScrollAreaSetBorderColor(PX_Object *pObj,px_color borderColor);
 px_void PX_Object_ScrollAreaFree(PX_Object *pObj);
 
@@ -608,16 +611,16 @@ px_void PX_Object_RotationRender(px_surface *psurface, PX_Object *Obj,px_uint el
 PX_Object *PX_Object_AutoTextCreate(px_memorypool *mp,PX_Object *Parent,int x,int y,int limit_width);
 PX_Object_AutoText * PX_Object_GetAutoText( PX_Object *Object );
 px_void PX_Object_AutoTextSetTextColor( PX_Object *pObject,px_color Color );
-px_void PX_Object_AutoTextSetText(PX_Object *Obj,px_char *Text);
+px_void PX_Object_AutoTextSetText(PX_Object *Obj,const px_char *Text);
 px_void PX_Object_AutoTextRender(px_surface *psurface, PX_Object *pObject,px_uint elpased);
 px_void PX_Object_AutoTextFree(PX_Object *Obj);
 px_int PX_Object_AutoTextGetHeight(PX_Object *Obj);
 
 
-PX_Object *PX_Object_AnimationCreate(px_memorypool *mp,PX_Object *Parent,px_int x,px_int y,px_animationlibrary *lib);
-px_void PX_Object_AnimationSetLibrary(PX_Object *Object,px_animationlibrary *lib);
+PX_Object *PX_Object_AnimationCreate(px_memorypool *mp,PX_Object *Parent,px_int x,px_int y,PX_Animationlibrary *lib);
+px_void PX_Object_AnimationSetLibrary(PX_Object *Object,PX_Animationlibrary *lib);
 PX_Object_Animation *PX_Object_GetAnimation(PX_Object *Object);
-px_void	   PX_Object_AnimationSetAlign(PX_Object *pObject,px_uchar Align);
+px_void	   PX_Object_AnimationSetAlign(PX_Object *pObject,px_dword Align);
 px_void	   PX_Object_AnimationRender(px_surface *psurface,PX_Object *pImage,px_uint elpased);
 px_void	   PX_Object_AnimationFree(PX_Object *pObject);
 
@@ -639,13 +642,13 @@ px_void		PX_Object_RoundCursorFree(PX_Object *pObject);
 
 PX_Object * PX_Object_ShapeCreate(px_memorypool *mp, PX_Object *Parent,px_int x,px_int y,px_shape *pshape );
 PX_Object_Shape * PX_Object_GetShape( PX_Object *Object );
-px_void PX_Object_ShapeSetAlign( PX_Object *pShape,px_uchar Align);
+px_void PX_Object_ShapeSetAlign( PX_Object *pShape,px_dword Align);
 px_void PX_Object_ShapeSetBlendColor( PX_Object *pShape,px_color blendcolor);
 px_void PX_Object_ShapeRender(px_surface *psurface, PX_Object *im,px_uint elpased);
 px_void PX_Object_RoundCursor_Mousemove(PX_Object *pobject,PX_Object_Event e,px_void *user_ptr);
 
 //use pushbutton function to operate cursor-button
-PX_Object *PX_Object_CursorButtonCreate(px_memorypool *mp,PX_Object *Parent,px_int x,px_int y,px_int Width,px_int Height,px_char *Text,px_color Color);
+PX_Object *PX_Object_CursorButtonCreate(px_memorypool *mp,PX_Object *Parent,px_int x,px_int y,px_int Width,px_int Height,const px_char *Text,px_color Color);
 PX_Object_CursorButton * PX_Object_GetCursorButton( PX_Object *Object );
 PX_Object * PX_Object_GetCursorButtonPushButton(PX_Object *Object);
 
@@ -669,7 +672,9 @@ px_void PX_Object_VirtualKeyBoardCursorColor( PX_Object *pObject,px_color Color 
 px_void PX_Object_VirtualKeyBoardPushColor( PX_Object *pObject,px_color Color );
 px_char PX_Object_VirtualKeyBoardGetCode(PX_Object *pObject);
 
-
+#define  PX_OBJECT_COORDINATEFLAGLINE_XSHOW						 1
+#define  PX_OBJECT_COORDINATEFLAGLINE_YLSHOW					 2
+#define  PX_OBJECT_COORDINATEFLAGLINE_YRSHOW					 4
 
 typedef enum 
 {
@@ -839,12 +844,21 @@ PX_Object *PX_Object_CoordinatesCreate(px_memorypool *mp, PX_Object *Parent,px_i
 
 #define PX_OBJECT_FILTER_EDITOR_MAX_PT 256
 #define PX_OBJECT_FILTER_EDITOR_DEFAULT_RADIUS 6
+
+typedef enum
+{
+	PX_OBJECT_FILTER_TYPE_Liner,
+	PX_OBJECT_FILTER_TYPE_dB,
+}PX_OBJECT_FILTER_TYPE;
+
+
 typedef struct
 {
 	px_int x,y;
 	px_bool bselect;
 	px_bool bCursor;
 }PX_Object_FilterEditor_OperatorPoint;
+
 
 typedef struct
 {
@@ -853,6 +867,7 @@ typedef struct
 	px_color borderColor;
 	px_color helpLineColor;
 	px_color ptColor;
+	px_bool showHorizontal;
 	int      FontSize;
 	px_int   HorizontalDividing;
 	px_int   VerticalDividing;
@@ -863,13 +878,20 @@ typedef struct
 	px_int	 bAdjust;
 	px_int   opCount;
 	px_int   radius;
-	px_double rangedb; 
+	px_double rangedb;
+	PX_OBJECT_FILTER_TYPE FilterType;
 	PX_Object_FilterEditor_OperatorPoint pt[PX_OBJECT_FILTER_EDITOR_MAX_PT];
 }PX_Object_FilterEditor;
 
 PX_Object_FilterEditor *PX_Object_GetFilterEditor(PX_Object *Object);
-PX_Object *PX_Object_FilterEditorCreate(px_memorypool *mp, PX_Object *Parent,px_int x,px_int y,px_int Width,px_int Height);
+
+PX_Object *PX_Object_FilterEditorCreate(px_memorypool *mp, PX_Object *Parent,px_int x,px_int y,px_int Width,px_int Height,PX_OBJECT_FILTER_TYPE type);
+px_void PX_Object_FilterEditorSethelpLineColor(PX_Object *Object,px_color clr);
+px_void PX_Object_FilterEditorSetptColor(PX_Object *Object,px_color clr);
+
 px_void PX_Object_FilterEditorSetOperateCount(PX_Object *Object,px_int opcount);
+px_void PX_Object_FilterEditorSetType(PX_Object *Object,PX_OBJECT_FILTER_TYPE type);
+px_void PX_Object_FilterEditorSetHorizontalShow(PX_Object *Object,px_bool HorizontalShow);
 px_void PX_Object_FilterEditorReset(PX_Object *Object);
 px_void PX_Object_FilterEditorSetRange(PX_Object *Object,px_double range);
 px_void PX_Object_FilterEditorSetFontColor(PX_Object *Object,px_color clr);
@@ -880,4 +902,38 @@ px_void PX_Object_FilterEditorSetHorizontalDividing(PX_Object *Object,px_int div
 px_void PX_Object_FilterEditorSetVerticalDividing(PX_Object *Object,px_int div);
 px_void PX_Object_FilterEditorMapData(PX_Object *Object,px_double data[],px_int size);
 px_double PX_Object_FilterEditorMapValue(PX_Object *Object,px_double precent);
+
+
+#define PX_OBJECT_CHECKBOX_MAX_CONTENT 64
+
+
+typedef enum
+{
+	PX_OBJECT_CHECKBOX_STATE_ONCURSOR,
+	PX_OBJECT_CHECKBOX_STATE_ONPUSH,
+	PX_OBJECT_CHECKBOX_STATE_NORMAL,
+}PX_Object_CHECKBOX_STATE;
+
+typedef struct  
+{
+	px_dword Align;
+	px_bool Border;
+	px_color TextColor;
+	px_color BorderColor;
+	px_color BackgroundColor;
+	px_color CursorColor;
+	px_color PushColor;
+	px_char Text[PX_OBJECT_CHECKBOX_MAX_CONTENT];
+	px_bool bCheck;
+	PX_Object_CHECKBOX_STATE state;
+}PX_Object_CheckBox;
+
+PX_Object_CheckBox *PX_Object_GetCheckBox(PX_Object *Object);
+PX_Object * PX_Object_CheckBoxCreate(px_memorypool *mp, PX_Object *Parent,px_int x,px_int y,px_int Width,px_int Height,const char text[]);
+px_bool PX_Object_CheckBoxGetCheck(PX_Object *Object);
+px_void PX_Object_CheckBoxSetBackgroundColor(PX_Object *Object,px_color clr);
+px_void PX_Object_CheckBoxSetBorderColor(PX_Object *Object,px_color clr);
+px_void PX_Object_CheckBoxSetPushColor(PX_Object *Object,px_color clr);
+px_void PX_Object_CheckBoxSetCursorColor(PX_Object *Object,px_color clr);
+px_void PX_Object_CheckBoxSetTextColor(PX_Object *Object,px_color clr);
 #endif

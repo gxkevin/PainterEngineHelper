@@ -313,6 +313,13 @@ px_void MP_Free(px_memorypool *MP, px_void *pAddress )
 	MemoryNode *TempNode;
 	MP->nodeCount--;
 	bExist=0;
+	#if defined(PX_DEBUG_MODE)
+	if (!pAddress)
+	{
+		PX_ASSERT();
+		return;
+	}
+	#endif
 	//Get Memory node information
 	TempPointer=(px_uchar *)pAddress-sizeof(MemoryNode);
 	TempNode=(MemoryNode *)TempPointer;
@@ -339,17 +346,20 @@ px_void MP_Free(px_memorypool *MP, px_void *pAddress )
 		}
 	}
 
-
-	if(DEBUG_i==sizeof(MP->DEBUG_allocdata)/sizeof(MP->DEBUG_allocdata[0]))
+	if (MP->DEBUG_allocdata[PX_COUNTOF(MP->DEBUG_allocdata)-1].addr==PX_NULL)
 	{
-		if(MP->ErrorCall_Ptr==PX_NULL)
-			PX_LOG("Invalid address free");
-		else
-			MP->ErrorCall_Ptr(PX_MEMORYPOOL_ERROR_INVALID_ADDRESS);
+		if(DEBUG_i==sizeof(MP->DEBUG_allocdata)/sizeof(MP->DEBUG_allocdata[0]))
+		{
+			if(MP->ErrorCall_Ptr==PX_NULL)
+				PX_LOG("Invalid address free");
+			else
+				MP->ErrorCall_Ptr(PX_MEMORYPOOL_ERROR_INVALID_ADDRESS);
 
-		PX_ASSERT();
-		goto _END;
+			PX_ASSERT();
+			goto _END;
+		}
 	}
+	
 
 
 

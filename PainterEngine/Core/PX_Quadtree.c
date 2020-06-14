@@ -244,8 +244,10 @@ px_void PX_QuadtreeTestNode(PX_Quadtree *pQuadtree,px_float x,px_float y,px_floa
 	box.x=x;
 	box.y=y;
 	box.userdata=userData;
-
-	PX_QuadtreeTestBox(pQuadtree,pQuadtree->AABB,box);
+	if (pQuadtree->boxes.size)
+	{
+		PX_QuadtreeTestBox(pQuadtree,pQuadtree->AABB,box);
+	}
 }
 
 px_void PX_QuadtreeResetTest(PX_Quadtree *pQuadtree)

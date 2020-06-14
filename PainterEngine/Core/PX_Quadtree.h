@@ -38,7 +38,7 @@ typedef struct
 }PX_Quadtree;
 
 px_bool PX_QuadtreeCreate(px_memorypool *mp,PX_Quadtree *pQuadtree,px_float mapStartX,px_float mapStartY,px_float mapWidth,px_float mapHeight,px_int ObjectsCount,px_int deep);
-px_void PX_QuadtreeAddNode(PX_Quadtree *pQuadtree,px_float x,px_float y,px_float width,px_float height,PX_Quadtree_UserData userData);
-px_void PX_QuadtreeTestNode(PX_Quadtree *pQuadtree,px_float x,px_float y,px_float width,px_float height,PX_Quadtree_UserData user);
+px_void PX_QuadtreeAddNode(PX_Quadtree *pQuadtree,px_float CenterX,px_float CenterY,px_float width,px_float height,PX_Quadtree_UserData userData);
+px_void PX_QuadtreeTestNode(PX_Quadtree *pQuadtree,px_float CenterX,px_float CenterY,px_float width,px_float height,PX_Quadtree_UserData user);
 px_void PX_QuadtreeResetTest(PX_Quadtree *pQuadtree);
 #endif

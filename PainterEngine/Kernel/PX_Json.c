@@ -31,6 +31,83 @@ PX_Json_Value * PX_JsonGetObjectValue(PX_Json_Value *json_value,const px_char na
 	return PX_NULL;
 }
 
+PX_Json_Value * PX_JsonGetValue(PX_Json *json,const px_char _payload[])
+{
+	px_int r_offset=0;
+	px_int s_offset=0;
+	px_char payload[256]={0};
+	px_char *lexeme=PX_NULL;
+	px_int i=0,array=0;
+
+	PX_Json_Value * it=&json->rootValue;
+	if (PX_strlen(_payload)>=sizeof(payload))
+	{
+		return PX_NULL;
+	}
+	PX_strset(payload,_payload);
+
+	while (payload[r_offset]!=0)
+	{
+		while (PX_TRUE)
+		{
+			if (payload[s_offset]=='.')
+			{
+				payload[s_offset]='\0';
+				s_offset++;
+				break;
+			}
+			if (payload[s_offset]=='\0')
+			{
+				break;
+			}
+			s_offset++;
+		}
+
+		lexeme=payload+r_offset;
+		i=PX_strlen(lexeme);
+		//array?
+		if (lexeme[i-1]==']')
+		{
+			lexeme[i-1]='\0';
+			i--;
+			while (i>0)
+			{
+				if (lexeme[i]=='[')
+				{
+					lexeme[i]='\0';
+					array=PX_atoi(lexeme+i+1);
+				}
+				i--;
+			}
+		}
+		if (array)
+		{
+			it=PX_JsonGetObjectValue(it,lexeme);
+			if (it->type==PX_JSON_VALUE_TYPE_ARRAY)
+			{
+				it=PX_JsonGetArrayValue(it,array);
+			}
+			else
+			{
+				return PX_NULL;
+			}
+			
+		}
+		else
+		{
+			it=PX_JsonGetObjectValue(it,lexeme);
+		}
+		
+		r_offset=s_offset;
+		if (!it)
+		{
+			break;
+		}
+
+	}
+	return it;
+}
+
 PX_Json_Value * PX_JsonGetArrayValue(PX_Json_Value *value,px_int i)
 {
 	if (value->type!=PX_JSON_VALUE_TYPE_ARRAY)

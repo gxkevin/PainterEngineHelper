@@ -1,5 +1,7 @@
 #include "PX_Tuning.h"
-px_void PX_TuningInitialize(px_memorypool *mp,PX_Tuning *tuning,px_double pitchShift,px_double timeShift,px_double window[],px_double filter[],px_double fix[],PX_TUNING_WINDOW_SIZE windowsize)
+
+
+px_void PX_TuningInitialize(px_memorypool *mp,PX_Tuning *tuning,px_int SampleRate,px_double pitchShift,px_double timeShift,px_double window[],px_double filter[],px_double fix[],PX_TUNING_WINDOW_SIZE windowsize)
 {
 	px_int i;
 	px_int N;
@@ -24,12 +26,6 @@ px_void PX_TuningInitialize(px_memorypool *mp,PX_Tuning *tuning,px_double pitchS
 	case PX_TUNING_WINDOW_SIZE_2048:
 		N=2048;
 		break;
-	case PX_TUNING_WINDOW_SIZE_4096:
-		N=4096;
-		break;
-	case PX_TUNING_WINDOW_SIZE_8192:
-		N=8192;
-		break;
 	default:
 		PX_ASSERT();
 		return;
@@ -45,7 +41,10 @@ px_void PX_TuningInitialize(px_memorypool *mp,PX_Tuning *tuning,px_double pitchS
 	tuning->spectrumInterpolationOffset=2;
 	tuning->spectrumInterpolationFactor=1/(pitchShift*timeShift);
 	tuning->interpolationFactor=pitchShift;
-	
+	tuning->ZCR_Low=0;
+	tuning->ZCR_High=1;
+	tuning->amp_threshold=0;
+	tuning->SampleRate=SampleRate;
 	PX_memset(tuning->lastphase,0,sizeof(tuning->lastphase));
 	PX_memset(tuning->previous_frame,0,sizeof(tuning->previous_frame));
 	PX_memset(tuning->half_previous_out,0,sizeof(tuning->half_previous_out));
@@ -57,7 +56,7 @@ px_void PX_TuningInitialize(px_memorypool *mp,PX_Tuning *tuning,px_double pitchS
 	}
 	else
 	{
-		for (i=0;i<PX_TUNING_MAX_EXECUTE_SIZE;i++)
+		for (i=0;i<PX_TUNING_MAX_FRAME_SIZE;i++)
 		{
 			tuning->filter[i]=1;
 		}
@@ -78,7 +77,7 @@ px_void PX_TuningInitialize(px_memorypool *mp,PX_Tuning *tuning,px_double pitchS
 	}
 	else
 	{
-		PX_memset(tuning->fix,0,sizeof(px_double)*PX_TUNING_MAX_EXECUTE_SIZE);
+		PX_memset(tuning->fix,0,sizeof(px_double)*PX_TUNING_MAX_FRAME_SIZE);
 	}
 
 
@@ -128,15 +127,15 @@ px_void PX_TuningSortSpectrum(PX_Tuning *tuning,px_complex AnalysisFrame[])
 px_int PX_TuningFilter(PX_Tuning *tuning,_IN px_double frame_unit[],px_int Size,_OUT px_double out_unit[])
 {
 	px_int oft=0,i=0,remainCount=0,outSize=0,resampleAllocSize=0;
-
+	px_double AmpAvg;
+	px_double ZCR;
 	px_int blockCount;
 	px_int blocksize;
 	px_complex *AnalysisFrame;
 	px_complex *Frame0;
 	px_complex *Frame1;
 	px_complex *Frame2;
-
-
+	 
 	px_double *resampledFrame;
 
 	blocksize=tuning->N/2;
@@ -146,7 +145,15 @@ px_int PX_TuningFilter(PX_Tuning *tuning,_IN px_double frame_unit[],px_int Size,
 	Frame1=(px_complex *)MP_Malloc(tuning->mp,tuning->N*sizeof(px_complex));
 	Frame2=(px_complex *)MP_Malloc(tuning->mp,tuning->N*sizeof(px_complex));
 	
-	resampleAllocSize+=(px_int)(Size/tuning->pitchShift);
+	if (tuning->pitchShift<1)
+	{
+		resampleAllocSize+=(px_int)(Size/tuning->pitchShift);
+	}
+	else
+	{
+		resampleAllocSize+=(Size);
+	}
+	
 	resampleAllocSize+=tuning->remainCount;
 	resampleAllocSize+=blocksize*3;
 	resampleAllocSize+=(px_int)((1-PX_FRAC(tuning->previousInterpolationOffset))/tuning->interpolationFactor);
@@ -162,50 +169,68 @@ px_int PX_TuningFilter(PX_Tuning *tuning,_IN px_double frame_unit[],px_int Size,
 	PX_memcpy(resampledFrame+oft,tuning->remian,sizeof(px_double)*tuning->remainCount);
 	oft+=tuning->remainCount;
 	
-	//Re-sample
-	while (PX_TRUE)
+	ZCR=PX_ZeroCrossingRate(frame_unit,Size);
+	AmpAvg=0;
+	for (i=0;i<Size;i++)
 	{
-		px_int index;
-		px_double d1=0,d2=0,dm,fraction=0;
-		tuning->previousInterpolationOffset+=tuning->interpolationFactor;
-
-		if (tuning->previousInterpolationOffset>Size)
-		{
-			tuning->previousInterpolationOffset-=tuning->interpolationFactor;
-			tuning->previousInterpolationOffset=tuning->previousInterpolationOffset-Size;
-			break;
-		}
-
-		if (oft>PX_TUNING_MAX_EXECUTE_SIZE-1)
-		{
-			break;
-		}
-
-		index=(px_int)tuning->previousInterpolationOffset;
-
-		if (index)
-		{
-			d1=frame_unit[index-1];
-		}
-		else
-		{
-			d1=tuning->previousInterpolationValue;
-		}
-
-		d2=frame_unit[index];
-
-		fraction=tuning->previousInterpolationOffset-(px_int)tuning->previousInterpolationOffset;
-
-		dm=d1+fraction*(d2-d1);
-
-		resampledFrame[oft]=dm;
-
-		oft++;
-
+		AmpAvg+=PX_ABS(frame_unit[i]);
 	}
+	AmpAvg/=Size;
+
+	if (ZCR<tuning->ZCR_Low||ZCR>tuning->ZCR_High||AmpAvg<tuning->amp_threshold)
+	{
+		for (i=0;i<Size;i++)
+		{
+			resampledFrame[oft]=frame_unit[i];
+			oft++;
+		}
+	}
+	else
+	{
+		//Re-sample
+		while (PX_TRUE)
+		{
+			px_int index;
+			px_double d1=0,d2=0,dm,fraction=0;
+			tuning->previousInterpolationOffset+=tuning->interpolationFactor;
+
+			if (tuning->previousInterpolationOffset>Size)
+			{
+				tuning->previousInterpolationOffset-=tuning->interpolationFactor;
+				tuning->previousInterpolationOffset=tuning->previousInterpolationOffset-Size;
+				break;
+			}
+
+			if (oft>PX_TUNING_MAX_EXECUTE_SIZE-1)
+			{
+				break;
+			}
+
+			index=(px_int)tuning->previousInterpolationOffset;
+
+			if (index)
+			{
+				d1=frame_unit[index-1];
+			}
+			else
+			{
+				d1=tuning->previousInterpolationValue;
+			}
+
+			d2=frame_unit[index];
+
+			fraction=tuning->previousInterpolationOffset-(px_int)tuning->previousInterpolationOffset;
+
+			dm=d1+fraction*(d2-d1);
+
+			resampledFrame[oft]=dm;
+
+			oft++;
+		}
+	}
+	
 
 	tuning->previousInterpolationValue=frame_unit[Size-1];
-
 
 
 	//spectrum
@@ -220,7 +245,7 @@ px_int PX_TuningFilter(PX_Tuning *tuning,_IN px_double frame_unit[],px_int Size,
 	{
 		px_double d1=0,d2=0,dm,fraction=0;
 		px_int index;
-		
+		px_double unitMaxAmp=0;
 
 		if (tuning->spectrumInterpolationOffset>=blockCount-1)
 		{
@@ -240,7 +265,7 @@ px_int PX_TuningFilter(PX_Tuning *tuning,_IN px_double frame_unit[],px_int Size,
 			AnalysisFrame[i].re*=tuning->window[i];
 			AnalysisFrame[i].im=0;
 		}
-
+		
 		PX_TuningSortSpectrum(tuning,AnalysisFrame);
 		PX_memcpy(Frame0,AnalysisFrame,tuning->N*sizeof(px_complex));
 
@@ -300,8 +325,7 @@ px_int PX_TuningFilter(PX_Tuning *tuning,_IN px_double frame_unit[],px_int Size,
 		for (i=0;i<=tuning->N/2;i++)
 		{
 			px_double distance;
-			px_double amp,phase;
-
+			
 			//amplitude
 			d1=Frame1[i].re;
 			d2=Frame2[i].re;
@@ -342,24 +366,48 @@ px_int PX_TuningFilter(PX_Tuning *tuning,_IN px_double frame_unit[],px_int Size,
 
 			//update last phase
 			tuning->lastphase[i]=dm;
+		}
+		
+		AmpAvg=0;
 
+		for (i=0;i<=tuning->N/2;i++)
+		{
+			AmpAvg+=AnalysisFrame[i].re;
+		}
+
+		AmpAvg/=(tuning->N/2+1);
+
+
+
+		
+		//filter & fix
+		for (i=0;i<=tuning->N/2;i++)
+		{
+			px_double amp,phase;
 			amp=AnalysisFrame[i].re;
 			phase=AnalysisFrame[i].im;
 
 			//filter
 			amp*=tuning->filter[i];
-			amp+=tuning->fix[i];
+			amp+=(tuning->fix[i]*AmpAvg);
 
+
+			if (amp<0)
+			{
+				amp=0;
+			}
+
+			//amp,phase->re,im
 			AnalysisFrame[i].re=amp*PX_cosd(phase);
 			AnalysisFrame[i].im=amp*PX_sind(phase);
 		}
+
+
 		AnalysisFrame[0].im=0;
 		AnalysisFrame[tuning->N/2].im=0;
-
 		PX_FT_Symmetry(AnalysisFrame,AnalysisFrame,tuning->N);
-		
 		PX_IFFT(AnalysisFrame,AnalysisFrame,tuning->N);
-
+		
 		for (i=0;i<blocksize;i++)
 		{
 			out_unit[outSize]=AnalysisFrame[i].re*tuning->window[i]+tuning->half_previous_out[i]*tuning->window[i+blocksize];
@@ -651,4 +699,15 @@ px_void PX_TuningSetTimeScale(PX_Tuning *tuning,px_double TimeScale)
 px_void PX_TuningSetFilter(PX_Tuning *tuning,px_double filter[])
 {
 	PX_memcpy(tuning->filter,filter,sizeof(px_double)*tuning->N);
+}
+
+px_void PX_TuningSetFix(PX_Tuning *tuning,px_double fix[])
+{
+	PX_memcpy(tuning->fix,fix,sizeof(px_double)*tuning->N);
+}
+
+px_void PX_TuningSetZCR(PX_Tuning *tuning,px_double low,px_double high)
+{
+	tuning->ZCR_Low=low;
+	tuning->ZCR_High=high;
 }

@@ -248,7 +248,7 @@ px_bool PX_SoundStaticDataCreate(PX_SoundData *sounddata,px_memorypool *mp,px_by
 	if (PX_WaveVerify(data,datasize))
 	{
 		px_uint offset=0,pcmSize,woffset;
-		sounddata->mp=mp;
+		
 		pcmSize=PX_WaveGetPCMSize(data,datasize);
 
 		if (pcmSize!=0)
@@ -261,7 +261,7 @@ px_bool PX_SoundStaticDataCreate(PX_SoundData *sounddata,px_memorypool *mp,px_by
 			sounddata->channel=PX_WaveGetChannel(data,pcmSize)==1?PX_SOUND_CHANNEL_ONE:PX_SOUND_CHANNEL_DOUBLE;
 			if (!sounddata->buffer)
 			{
-				return PX_FALSE;
+				goto _ERROR;
 			}
 			pfmt_block=(PX_WAVE_FMT_BLOCK  *)(data+sizeof(PX_WAVE_RIFF_HEADER));
 			offset+=sizeof(PX_WAVE_RIFF_HEADER);
@@ -285,13 +285,19 @@ px_bool PX_SoundStaticDataCreate(PX_SoundData *sounddata,px_memorypool *mp,px_by
 			}
 		}
 		else
-			return PX_FALSE;
+			goto _ERROR;
 	}
 	else
 	{
-		return PX_FALSE;
+		goto _ERROR;
 	}
+	sounddata->mp=mp;
 	return PX_TRUE;
+_ERROR:
+	sounddata->mp=PX_NULL;
+	sounddata->size=0;
+	sounddata->buffer=PX_NULL;
+	return PX_FALSE;
 }
 
 px_void PX_SoundStaticDataFree(PX_SoundData *sounddata)

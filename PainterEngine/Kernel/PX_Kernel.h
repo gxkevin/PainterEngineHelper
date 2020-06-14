@@ -15,7 +15,6 @@
 #include "PX_Partical.h"
 #include "PX_Animation.h"
 #include "PX_World.h"
-#include "PX_TransmissionProtocal.h"
 #include "PX_Sync.h"
 #include "PX_Object.h"
 #include "PX_Json.h"

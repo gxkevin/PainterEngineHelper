@@ -27,7 +27,7 @@ typedef struct
 	{
 		px_texture texture;
 		px_shape  shape;
-		px_animationlibrary animationlibrary;
+		PX_Animationlibrary animationlibrary;
 		PX_ScriptVM_Instance Script;
 		PX_SoundData sound;
 		px_memory data;
@@ -44,17 +44,17 @@ typedef struct
 
 
 px_bool PX_ResourceLibraryInit(px_memorypool *mp,PX_ResourceLibrary *lib);
-px_bool  PX_ResourceLibraryLoad(PX_ResourceLibrary *lib,PX_RESOURCE_TYPE type,px_byte *data,px_uint datasize,px_char *key);
-px_bool PX_ResourceLibraryAddTexture(PX_ResourceLibrary *lib,px_char *key,px_texture *pTexture);
-PX_Resource * PX_ResourceLibraryGet(PX_ResourceLibrary *lib,px_char *key);
-px_texture *PX_ResourceLibraryGetTexture(PX_ResourceLibrary *lib,px_char *key);
-px_shape *PX_ResourceLibraryGetShape(PX_ResourceLibrary *lib,px_char *key);
-px_animationlibrary *PX_ResourceLibraryGetAnimationLibrary(PX_ResourceLibrary *lib,px_char *key);
-PX_ScriptVM_Instance *PX_ResourceLibraryGetScript(PX_ResourceLibrary *lib,px_char *key);
-PX_SoundData *PX_ResourceLibraryGetSound(PX_ResourceLibrary *lib,px_char *key);
-px_memory *PX_ResourceLibraryGetData(PX_ResourceLibrary *lib,px_char *key);
+px_bool  PX_ResourceLibraryLoad(PX_ResourceLibrary *lib,PX_RESOURCE_TYPE type,px_byte *data,px_uint datasize,const px_char key[]);
+px_bool PX_ResourceLibraryAddTexture(PX_ResourceLibrary *lib,const px_char key[],px_texture *pTexture);
+PX_Resource * PX_ResourceLibraryGet(PX_ResourceLibrary *lib,const px_char key[]);
+px_texture *PX_ResourceLibraryGetTexture(PX_ResourceLibrary *lib,const px_char key[]);
+px_shape *PX_ResourceLibraryGetShape(PX_ResourceLibrary *lib,const px_char key[]);
+PX_Animationlibrary *PX_ResourceLibraryGetAnimationLibrary(PX_ResourceLibrary *lib,const px_char key[]);
+PX_ScriptVM_Instance *PX_ResourceLibraryGetScript(PX_ResourceLibrary *lib,const px_char key[]);
+PX_SoundData *PX_ResourceLibraryGetSound(PX_ResourceLibrary *lib,const px_char key[]);
+px_memory *PX_ResourceLibraryGetData(PX_ResourceLibrary *lib,const px_char key[]);
 
-px_void PX_ResourceLibraryDelete(PX_ResourceLibrary *lib,px_char *key);
+px_void PX_ResourceLibraryDelete(PX_ResourceLibrary *lib,const px_char key[]);
 px_void PX_ResourceLibraryFree(PX_ResourceLibrary *lib);
 
 

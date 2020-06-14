@@ -311,9 +311,12 @@ px_void PX_LayerFree(PX_ANN *pANN,PX_ANN_Layer *layer)
 	MP_Free(pANN->mp,layer->back);
 	MP_Free(pANN->mp,layer->net);
 	MP_Free(pANN->mp,layer->out);
-	MP_Free(pANN->mp,layer->w);
-	MP_Free(pANN->mp,layer->bias);
+	if(layer->w)
+		MP_Free(pANN->mp,layer->w);
+	if(layer->bias)
+		MP_Free(pANN->mp,layer->bias);
 }
+
 px_void PX_ANNFree(PX_ANN *pANN)
 {
 	PX_ANN_Layer *p=pANN->Layer,*pnext;
@@ -324,6 +327,9 @@ px_void PX_ANNFree(PX_ANN *pANN)
 		MP_Free(pANN->mp,p);
 		p=pnext;
 	}
+	pANN->mp=PX_NULL;
+	pANN->LayerCount=0;
+	pANN->Layer=PX_NULL;
 }
 
 

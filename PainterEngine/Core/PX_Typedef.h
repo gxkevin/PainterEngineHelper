@@ -11,13 +11,14 @@
 
 #define     _IN
 #define     _OUT
+#define     _LIMIT
 #define     PX_FALSE			0
 #define     PX_TRUE				1
 #define		PX_NULL				0
 #define     PX_PI				3.141592653589793238462
 #define     PX_e                (2.7182818284590452353602)
 #define     PX_e2               (PX_e*PX_e)
-#define     PX_RAND_MAX         (0xefffffff)
+#define     PX_RAND_MAX         (0xffff)
 
 
 #ifdef _DEBUG
@@ -234,8 +235,8 @@ px_float PX_Point_cos(px_point v);
 //////////////////////////////////////////////////////////////////////////
 //string to others
 
-px_uint PX_htoi(px_char hex_str[]);
-px_int  PX_atoi(px_char str[]);
+px_uint PX_htoi(const px_char hex_str[]);
+px_int  PX_atoi(const px_char str[]);
 px_float PX_atof(px_char fstr[]);
 PX_RETURN_STRING PX_ftos(px_float f, int precision);
 PX_RETURN_STRING PX_itos(px_int num,px_int radix);
@@ -270,9 +271,12 @@ void PX_memdwordset(void *dst,px_dword dw,px_int count);
 px_bool PX_memequ(const void *dst,const void *src,px_int size);
 px_void PX_memcpy(px_void *dst,const px_void *src,px_int size);
 px_void PX_strcpy(px_char *dst,const px_char *src,px_int size);
+px_void PX_wstrcpy(px_word *dst,const px_word *src,px_int size);
 px_void PX_strcat(px_char *src,const px_char *cat);
+px_void PX_wstrcat(px_word *src,const px_word *cat);
 px_void PX_strset(px_char *dst,const px_char *src);
 px_int PX_strlen(const px_char *dst);
+px_int PX_wstrlen(const px_word *dst);
 px_int PX_strcmp(const px_char *str1, const px_char *str2);
 px_bool PX_strequ(const px_char *src,const char *dst);
 px_void PX_strupr(px_char *src);
@@ -356,6 +360,7 @@ px_int PX_sprintf2(px_char *str,px_int str_size,const px_char fmt[],\
 px_int PX_sprintf1(px_char *str,px_int str_size,const px_char fmt[],\
 	px_stringformat _1\
 	);
+px_int PX_sprintf0(px_char *str,px_int str_size,const px_char fmt[]);
 /*px_int px_sprintf(px_char *str,px_int str_size,px_char fmt[],...);*/
 //////////////////////////////////////////////////////////////////////////
 
@@ -463,8 +468,12 @@ typedef enum
 void PX_Cepstrum(_IN px_complex x[],_OUT px_complex X[],px_int N,PX_CEPSTRUM_TYPE type);
 
 //////////////////////////////////////////////////////////////////////////
+//zero-crossing rate,ZCR
+px_double PX_ZeroCrossingRate(_IN px_double x[],px_int N);
+px_double PX_ZeroCrossingRateComplex(_IN px_complex x[],px_int N);
+//////////////////////////////////////////////////////////////////////////
 //PitchEstimation
-px_int PX_PitchEstimation(_IN px_complex x[],px_int N,px_int sampleRate);
+px_int PX_PitchEstimation(_IN px_complex x[],px_int N,px_int sampleRate,px_int low_Hz,px_int high_Hz);
 //////////////////////////////////////////////////////////////////////////
 //PreEmphasise
 void PX_PreEmphasise(const px_double *data, int len, px_double *out, px_double preF);//0.9<preF<1.0 suggest 0.9;
@@ -477,7 +486,7 @@ void PX_UpSampled(_IN px_complex x[],_OUT px_complex X[],px_int N,px_int L);
 
 //////////////////////////////////////////////////////////////////////////
 //ipv4
-px_dword PX_inet_addr( px_char cp[] );
+px_dword PX_inet_addr( const px_char cp[] );
 px_char* PX_inet_ntoa( px_dword ipv4 );
 
 //////////////////////////////////////////////////////////////////////////

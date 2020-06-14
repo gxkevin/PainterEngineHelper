@@ -11,7 +11,7 @@ static px_bool PX_isBigEndianCPU()
 
 }
 
-px_uint PX_htoi(px_char hex_str[])   
+px_uint PX_htoi(const px_char hex_str[])   
 {  
 	px_char ch;   
 	px_uint iret=0;  
@@ -23,7 +23,7 @@ px_uint PX_htoi(px_char hex_str[])
 } 
 
 
-px_int PX_atoi(px_char s[])
+px_int PX_atoi(const px_char s[])
 {
 	px_int i,n,sign=1;
 	for(i=0;s[i]==' ';i++);
@@ -987,6 +987,11 @@ px_int PX_sprintf2(px_char *str,px_int str_size,const px_char fmt[], px_stringfo
 px_int PX_sprintf1(px_char *str,px_int str_size,const px_char fmt[], px_stringformat _1)
 {
 	return PX_sprintf8(str,str_size,fmt,_1,PX_STRINGFORMAT_INT(0),PX_STRINGFORMAT_INT(0),PX_STRINGFORMAT_INT(0),PX_STRINGFORMAT_INT(0),PX_STRINGFORMAT_INT(0),PX_STRINGFORMAT_INT(0),PX_STRINGFORMAT_INT(0));
+}
+
+px_int PX_sprintf0(px_char *str,px_int str_size,const px_char fmt[])
+{
+	return PX_sprintf8(str,str_size,fmt,PX_STRINGFORMAT_INT(0),PX_STRINGFORMAT_INT(0),PX_STRINGFORMAT_INT(0),PX_STRINGFORMAT_INT(0),PX_STRINGFORMAT_INT(0),PX_STRINGFORMAT_INT(0),PX_STRINGFORMAT_INT(0),PX_STRINGFORMAT_INT(0));
 }
 
 void PX_MatrixZero(px_matrix *Mat)
@@ -2103,6 +2108,19 @@ px_void PX_strcpy(px_char *dst,const px_char *src,px_int size)
 	*(dst-1)='\0';
 }
 
+px_void PX_wstrcpy(px_word *dst,const px_word *src,px_int size)
+{
+	while(size--)
+		if(*src)
+			*(dst++)=*(src++);
+		else
+		{
+			*dst='\0';
+			return;
+		}
+		*(dst-1)='\0';
+}
+
 px_void PX_strcat(px_char *src,const px_char *cat)
 {
 	px_int len=PX_strlen(cat);
@@ -2111,6 +2129,13 @@ px_void PX_strcat(px_char *src,const px_char *cat)
 	*src='\0';
 }
 
+px_void PX_wstrcat(px_word *src,const px_word *cat)
+{
+	px_int len=PX_wstrlen(cat);
+	while(*src)src++;
+	while(len--)*src++=*cat++;
+	*src='\0';
+}
 
 px_void PX_strset(px_char *dst,const px_char*src)
 {
@@ -2130,6 +2155,19 @@ px_int PX_strlen(const px_char *dst)
 	while(dst[len++]);
 	return len-1;
 }
+
+px_int PX_wstrlen(const px_word *dst)
+{
+	px_int len=0;
+	if(!dst)
+	{
+		PX_ERROR("NULL pointer assert!");
+		return 0;
+	}
+	while(dst[len++]);
+	return len-1;
+}
+
 
 px_void PX_strupr(px_char *src)
 {
@@ -2657,14 +2695,55 @@ void PX_Cepstrum(_IN px_complex x[],_OUT px_complex X[],px_int N,PX_CEPSTRUM_TYP
 	
 }
 
-px_int PX_PitchEstimation(_IN px_complex x[],px_int N,px_int sampleRate)
+px_double PX_ZeroCrossingRate(_IN px_double x[],px_int N)
 {
-	px_int low,high,i,idx;
-	px_double max=0,avg=0;
-	low=sampleRate/1200;
-	high=sampleRate/83;
+	px_int i,zeroCross;
+	zeroCross=0;
+	for (i=1;i<N;i++)
+	{
+		if (x[i]*x[i-1]<0)
+		{
+			zeroCross++;
+		}
+	}
+	return zeroCross*1.0/N;
+}
+
+px_double PX_ZeroCrossingRateComplex(_IN px_complex x[],px_int N)
+{
+	px_int i,zeroCross;
+	zeroCross=0;
+	for (i=1;i<N;i++)
+	{
+		if (x[i].re*x[i-1].re<0)
+		{
+			zeroCross++;
+		}
+	}
+	return zeroCross*1.0/N;
+}
+
+px_int PX_PitchEstimation(_IN px_complex x[],px_int N,px_int sampleRate,px_int low_Hz,px_int high_Hz)
+{
+	px_int low=0,high=0,i,idx=0;
+	px_double max=0;
+	px_int zeroCross=0;
+	low=sampleRate/high_Hz;
+	high=sampleRate/low_Hz;
+	for (i=1;i<N;i++)
+	{
+		if (x[i].re*x[i-1].re<0)
+		{
+			zeroCross++;
+		}
+	}
+	if (zeroCross*1.0f/N>0.15)
+	{
+		return 0;
+	}
+
 	PX_Cepstrum(x,x,N,PX_CEPTRUM_TYPE_REAL);
-	avg=0;
+
 	if (high>=N||high==low)
 	{
 		return 0;
@@ -2677,15 +2756,12 @@ px_int PX_PitchEstimation(_IN px_complex x[],px_int N,px_int sampleRate)
 			max=x[i].re;
 			idx=i;
 		}
-		avg+=x[i].re;
 	}
-	avg/=(high-low+1);
-
-	if (max>avg*12)
+	if (idx==0)
 	{
-		return sampleRate/idx;
+		return 0;
 	}
-	return 0;
+	return sampleRate/idx;
 }
 
 void PX_PreEmphasise(const px_double *data, int len, px_double *out, px_double preF)//0.9<preF<1.0 suggest 0.9
@@ -3106,7 +3182,7 @@ px_void PX_srand(px_uint64 seed)
 
 px_uint32 PX_rand()
 {
-	return  (px_uint32)(px_srand_seed = (px_srand_seed*764261123)%(0xefffffff));
+	return  ((px_uint32)(px_srand_seed = (px_srand_seed*764261123)%(0xefffffff)))&PX_RAND_MAX;
 }
 
 
@@ -3285,7 +3361,7 @@ px_bool PX_isPointInCircle(px_point p,px_point circle,px_float radius)
 	return PX_FALSE;
 }
 
-px_dword  PX_inet_addr( px_char cp[] )
+px_dword  PX_inet_addr( const px_char cp[] )
 {
 	px_uchar ipBytes[4]={0};
 	px_int i;
@@ -3379,7 +3455,7 @@ px_uint32 PX_sum32(px_void *buffer, px_uint size)
 // 			break;
 // 		case 's':
 // 			sval = _px_va_arg(ap, char *); 
-// 			finalLen +=px_strlen(sval);
+// 			finalLen +=PX_strcpy(sval);
 // 			break;
 // 		default:
 // 			finalLen+=1;
@@ -3404,17 +3480,17 @@ px_uint32 PX_sum32(px_void *buffer, px_uint size)
 // 		case 'd':
 // 			ival = _px_va_arg(ap, px_int);
 // 			oft+=PX_itoa(ival,dat,sizeof dat,10);
-// 			px_strcat(str,dat);
+// 			PX_strcat(str,dat);
 // 			break;
 // 		case 'f':
 // 			dval = _px_va_arg(ap, px_double);
 // 			oft+=PX_ftoa((px_float)dval,dat,sizeof dat,6);
-// 			px_strcat(str,dat);
+// 			PX_strcat(str,dat);
 // 			break;
 // 		case 's':
 // 			sval = _px_va_arg(ap, char *); 
-// 			oft+=px_strlen(sval);
-// 			px_strcat(str,sval);
+// 			oft+=PX_strcpy(sval);
+// 			PX_strcat(str,sval);
 // 			break;
 // 		default:
 // 			str[oft++]=*p;

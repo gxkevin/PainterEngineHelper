@@ -20745,6 +20745,16 @@ px_void PX_FontModule_atow(const char *a,px_word *w)
 	{
 		*w++=*a++;
 	}
+	*w=0;
+}
+
+
+px_void PX_FontModule_wastrcat(px_word *src,const px_char *cat)
+{
+	px_int len=PX_strlen(cat);
+	while(*src)src++;
+	while(len--)*src++=*cat++;
+	*src='\0';
 }
 
 px_bool PX_FontModuleInitialize(px_memorypool *mp,PX_FontModule *module)
@@ -20767,10 +20777,14 @@ px_bool PX_FontModuleLoad(PX_FontModule *module,px_byte *buffer,px_int size)
 		PX_FontModule_Charactor_Header *pcHeader=(PX_FontModule_Charactor_Header *)(buffer+offset);
 		offset+=sizeof(PX_FontModule_Charactor_Header);
 		pData=(buffer+offset);
-		if(pcHeader->c_magic[0]!='P')  goto _ERROR;
-		if(pcHeader->c_magic[1]!='X')  goto _ERROR;
-		if(pcHeader->c_magic[2]!='F')  goto _ERROR;
-		if(pcHeader->c_magic[3]!='M')  goto _ERROR;
+		if(pcHeader->c_magic[0]!='P')  
+			goto _ERROR;
+		if(pcHeader->c_magic[1]!='X')  
+			goto _ERROR;
+		if(pcHeader->c_magic[2]!='F')  
+			goto _ERROR;
+		if(pcHeader->c_magic[3]!='M')  
+			goto _ERROR;
 
 		PX_itoa(pcHeader->charactor_code,hex,sizeof(hex),16);
 		if (PX_MapGet(&module->characters_map,hex))
@@ -20788,7 +20802,10 @@ px_bool PX_FontModuleLoad(PX_FontModule *module,px_byte *buffer,px_int size)
 		
 		PX_memcpy(cpy,pcHeader,sizeof(PX_FontModule_Charactor_Header));
 
-		if(!PX_ShapeCreate(module->mp,&cpy->shape,cpy->header.Font_Width,cpy->header.Font_Height)) goto _ERROR;
+		if(!PX_ShapeCreate(module->mp,&cpy->shape,cpy->header.Font_Width,cpy->header.Font_Height))
+		{
+			goto _ERROR;
+		}
 		PX_memcpy(cpy->shape.alpha,pData,cpy->header.Font_Width*cpy->header.Font_Height);
 		offset+=cpy->header.Font_Width*cpy->header.Font_Height;
 		PX_MapPut(&module->characters_map,hex,cpy);

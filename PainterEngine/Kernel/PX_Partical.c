@@ -78,6 +78,7 @@ px_bool PX_ParticalLauncherCreateEx(PX_Partical_Launcher *env,px_memorypool *mp,
 	env->direction.z=0;
 	env->CreateParticalFuncIndex=-1;
 	env->UpdateParitcalFuncIndex=-1;
+	env->user=Info.user;
 
 	env->ParticalPool=(PX_Partical_Atom *)MP_Malloc(mp,sizeof(PX_Partical_Atom)*env->maxCount);
 	PX_memset(env->ParticalPool,0,sizeof(PX_Partical_Atom)*env->maxCount);
@@ -606,5 +607,10 @@ px_bool PX_ParticalLauncherSetCreateFuncIndex(PX_Partical_Launcher *launcher,px_
 px_bool PX_ParticalLauncherSetUpdateFuncIndex(PX_Partical_Launcher *launcher,px_char *func_Name)
 {
 	return launcher->UpdateParitcalFuncIndex=PX_ScriptVM_GetFunctionIndex(launcher->VM_Instance,func_Name)!=-1;
+}
+
+px_void PX_ParticalLauncherSetDirection(PX_Partical_Launcher *launcher,px_point direction)
+{
+	launcher->direction=direction;
 }
 

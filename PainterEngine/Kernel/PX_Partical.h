@@ -21,6 +21,7 @@ typedef struct
 	float      roatationSpeed;
 	float      sizeIncrement;
 	float      alphaIncrement; 
+	px_void    *User;
 }PX_Partical_Atom;
 struct _PX_Partical_Launcher;
 typedef PX_Partical_Atom (* PX_ParticalLauncher_CreateAtom)(struct _PX_Partical_Launcher *launcher,px_int index);
@@ -57,6 +58,7 @@ typedef struct _PX_Partical_Launcher
 typedef struct
 {
 	px_texture *tex;
+	px_void		*user;
 	px_int		generateDuration;
 	px_int		maxCount;
 	px_point	force;
@@ -71,6 +73,7 @@ px_bool PX_ParticalLauncherCreate(PX_Partical_Launcher *launcher,px_memorypool  
 px_void PX_ParticalLauncherSetLauncherPosition(PX_Partical_Launcher *launcher,px_point position);
 px_bool PX_ParticalLauncherSetCreateFuncIndex(PX_Partical_Launcher *launcher,px_char *func_Name);
 px_bool PX_ParticalLauncherSetUpdateFuncIndex(PX_Partical_Launcher *launcher,px_char *func_Name);
+px_void PX_ParticalLauncherSetDirection(PX_Partical_Launcher *launcher,px_point direction);
 
 px_bool PX_ParticalLauncherUpdate(PX_Partical_Launcher *launcher,px_dword elpased);
 px_void PX_ParticalLauncherRender(px_surface *surface,PX_Partical_Launcher *launcher,px_point position);

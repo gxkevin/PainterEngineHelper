@@ -63,6 +63,8 @@ px_void PX_FontDrawChar(px_surface *psurface,int x,int y,const px_char *Text,px_
 px_int  PX_GetFontTextPixelsWidth(px_char *Text);
 
 px_void PX_FontModule_atow(const char *a,px_word *w);
+px_void PX_FontModule_wstrcat(px_word *dst,const px_word *str);
+px_void PX_FontModule_wastrcat(px_word *dst,const px_char *str);
 px_bool PX_FontModuleInitialize(px_memorypool *mp,PX_FontModule *module);
 px_bool PX_FontModuleLoad(PX_FontModule *module,px_byte *buffer,px_int size);
 px_void PX_FontModuleFree(PX_FontModule *module);

@@ -600,7 +600,7 @@ px_void PX_TextureRenderRotation_sincos(px_surface *psurface,px_texture *tex,px_
 				clr._argb.g=bG>255?255:(px_uchar)bG;
 				clr._argb.b=bB>255?255:(px_uchar)bB;
 
-				PX_SurfaceDrawPixel(psurface,i+x,j+y,PX_COLOR((px_uchar)mixa,(px_uchar)mixr,(px_uchar)mixg,(px_uchar)mixb));
+				PX_SurfaceDrawPixel(psurface,i+x,j+y,clr);
 			}
 			else
 			{

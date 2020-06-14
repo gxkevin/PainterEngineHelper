@@ -93,17 +93,17 @@ px_void PX_StringFree(px_string *str)
 
 px_bool PX_StringInit(px_memorypool *mp,px_string *str)
 {
-	str->buffer=(px_char *)MP_Malloc(mp,8);
+	str->buffer=(px_char *)MP_Malloc(mp,16);
 	if(!str->buffer)return PX_FALSE;
-	str->bufferlen=8;
-	PX_memset(str->buffer,0,8);
+	str->bufferlen=16;
+	PX_memset(str->buffer,0,16);
 	str->mp=mp;
 	return PX_TRUE;
 }
 
 px_void PX_StringInitAlloc(px_memorypool *mp,px_string *str,px_int allocSize)
 {
-	int size=8;
+	int size=16;
 	while(size<allocSize)
 	{
 		size<<=1;
@@ -142,7 +142,7 @@ px_void PX_StringInitAlloc(px_memorypool *mp,px_string *str,px_int allocSize)
 // 			break;
 // 		case 's':
 // 			sval = _px_va_arg(ap, char *); 
-// 			finalLen +=px_strlen(sval);
+// 			finalLen +=PX_strcpy(sval);
 // 			break;
 // 		default:
 // 			finalLen+=1;
@@ -168,17 +168,17 @@ px_void PX_StringInitAlloc(px_memorypool *mp,px_string *str,px_int allocSize)
 // 		case 'd':
 // 			ival = _px_va_arg(ap, px_int);
 // 			oft+=PX_itoa(ival,dat,sizeof dat,10);
-// 		    px_strcat(str->buffer,dat);
+// 		    PX_strcat(str->buffer,dat);
 // 			break;
 // 		case 'f':
 // 			dval = _px_va_arg(ap, px_double);
 // 			oft+=PX_ftoa((px_float)dval,dat,sizeof dat,6);
-// 			px_strcat(str->buffer,dat);
+// 			PX_strcat(str->buffer,dat);
 // 			break;
 // 		case 's':
 // 			sval = _px_va_arg(ap, char *); 
-// 			oft+=px_strlen(sval);
-// 			px_strcat(str->buffer,sval);
+// 			oft+=PX_strcpy(sval);
+// 			PX_strcat(str->buffer,sval);
 // 			break;
 // 		default:
 // 			str->buffer[oft++]=*p;

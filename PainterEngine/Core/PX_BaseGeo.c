@@ -1778,7 +1778,6 @@ px_void PX_GeoDrawRing(px_surface *psurface, px_int x,px_int y,px_int Radius,px_
 	start_angle-=repeat*360;
 	end_angle-=repeat*360;
 
-
 	s_quadrant=(start_angle%360)/90+1;
 	e_quadrant=(end_angle%360)/90+1;
 
@@ -2155,7 +2154,8 @@ px_void PX_GeoDrawSector(px_surface *psurface, px_int x,px_int y,px_int Radius_o
 	px_int rx,ry,dy,i,xleft,xright,Sy,cY,drx,dry;
 	px_float rad,rad2,xoft1,xoft2,xoft3,xoft4,S,fy,fdis;
 	px_color clr;
-
+	px_int repeat=0;
+	
 
 	if(color._argb.a==0)
 	{
@@ -2168,6 +2168,9 @@ px_void PX_GeoDrawSector(px_surface *psurface, px_int x,px_int y,px_int Radius_o
 		return;
 	}
 
+	repeat=start_angle/360;
+	start_angle-=repeat*360;
+	end_angle-=repeat*360;
 
 	s_quadrant=(start_angle%360)/90+1;
 	e_quadrant=(end_angle%360)/90+1;
