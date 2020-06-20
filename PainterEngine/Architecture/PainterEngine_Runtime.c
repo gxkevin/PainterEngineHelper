@@ -37,11 +37,22 @@ px_bool PX_RuntimeInitialize(PX_Runtime *pe,px_int width,px_int height,px_void *
 	//resources
 	if(!PX_ResourceLibraryInit(&pe->mp_resources,&pe->ResourceLibrary))return PX_FALSE;
 	//surface
-	if(!PX_SurfaceCreate(&pe->mp,width,height,&pe->RenderSurface))
+	if (width==0||height==0)
 	{
-		return PX_FALSE;
+		pe->RenderSurface.height=0;
+		pe->RenderSurface.width=0;
+		pe->RenderSurface.surfaceBuffer=PX_NULL;
+		pe->RenderSurface.MP=PX_NULL;
 	}
-	PX_SurfaceClear(&pe->RenderSurface,0,0,pe->RenderSurface.width-1,pe->RenderSurface.height-1,PX_COLOR(255,255,255,255));
+	else
+	{
+		if(!PX_SurfaceCreate(&pe->mp,width,height,&pe->RenderSurface))
+		{
+			return PX_FALSE;
+		}
+		PX_SurfaceClear(&pe->RenderSurface,0,0,pe->RenderSurface.width-1,pe->RenderSurface.height-1,PX_COLOR(255,255,255,255));
+	}
+	
 	return PX_TRUE;
 }
 
@@ -53,4 +64,9 @@ px_memorypool PX_RuntimeCreateCalcMemoryPool(PX_Runtime *pe)
 px_void PX_RuntimeFreeCalcMemoryPool(PX_Runtime *pe,px_memorypool mp)
 {
 	MP_Free(&pe->mp,mp.StartAddr);
+}
+
+px_void PX_RuntimeRenderClear(PX_Runtime *runtime,px_color color)
+{
+	PX_SurfaceClear(&runtime->RenderSurface,0,0,runtime->RenderSurface.width-1,runtime->RenderSurface.height-1,color);
 }

@@ -44,7 +44,7 @@ px_void		PX_ConsoleShow(PX_Console *pc,px_bool b);
 px_void		PX_ConsolePostEvent(PX_Console *pc,PX_Object_Event e);
 px_void		PX_ConsoleUpdate(PX_Console *pc,px_dword elpased);
 px_void		PX_ConsoleRender(PX_Console *pc,px_dword elpased);
-PX_Object * PX_ConsolePrintText(PX_Console *pc,px_char *text);
+PX_Object * PX_ConsolePrintText(PX_Console *pc,const px_char *text);
 PX_Object * PX_ConsolePrintImage(PX_Console *pc,px_char *res_image_key);
 PX_Object * PX_ConsolePrintShape(PX_Console *pc,px_char *res_image_key,px_color color);
 PX_Object * PX_ConsolePrintAnimation(PX_Console *pc,px_char *res_animation_key);

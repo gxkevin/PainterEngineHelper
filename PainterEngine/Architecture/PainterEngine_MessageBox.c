@@ -6,6 +6,11 @@ px_void PX_MessageBox_BtnYesClick(PX_Object *pObject,PX_Object_Event e,px_void *
 	PX_MessageBox *pm=(PX_MessageBox *)user;
 	pm->retVal=PX_MESSAGEBOX_RETURN_YES;
 	pm->mode=PX_MESSAGEBOX_MODE_CLOSE;
+	if (pm->function_yes)
+	{
+		pm->function_yes(pm->function_yes_ptr);
+	}
+
 }
 
 px_void PX_MessageBox_BtnNoClick(PX_Object *pObject,PX_Object_Event e,px_void *user)
@@ -13,6 +18,10 @@ px_void PX_MessageBox_BtnNoClick(PX_Object *pObject,PX_Object_Event e,px_void *u
 	PX_MessageBox *pm=(PX_MessageBox *)user;
 	pm->retVal=PX_MESSAGEBOX_RETURN_NO;
 	pm->mode=PX_MESSAGEBOX_MODE_CLOSE;
+	if (pm->function_no)
+	{
+		pm->function_no(pm->function_yes_ptr);
+	}
 }
 
 
@@ -24,6 +33,9 @@ px_bool PX_MessageBoxInitialize(PX_Runtime *runtime,PX_MessageBox *pm,PX_FontMod
 	pm->window_Width=window_Width;
 	pm->window_Height=window_Height;
 	pm->retVal=PX_MESSAGEBOX_RETURN_NONE;
+	pm->function_no=PX_NULL;
+	pm->function_yes=PX_NULL;
+
 	if(!(pm->root=PX_ObjectCreate(&runtime->mp_ui,PX_NULL,0,0,0,0,0,0))) return PX_FALSE;
 	
 	if(!(pm->btn_Ok=PX_Object_PushButtonCreate(&runtime->mp_ui,pm->root,window_Width/2+200,window_Height/2+150,84,28,"OK",PX_COLOR(255,0,0,0)))) return PX_FALSE;
@@ -34,6 +46,9 @@ px_bool PX_MessageBoxInitialize(PX_Runtime *runtime,PX_MessageBox *pm,PX_FontMod
 	pm->Message=PX_NULL;
 	pm->show=PX_FALSE;
 	pm->fontmodule=fontmodule;
+
+	pm->PX_MESSAGEBOX_STAGE_1_HEIGHT=PX_MESSAGEBOX_DEFAULT_STAGE_1_HEIGHT;
+	pm->PX_MESSAGEBOX_STAGE_2_HEIGHT=PX_MESSAGEBOX_DEFAULT_STAGE_2_HEIGHT;
 
 	PX_ObjectRegisterEvent(pm->btn_Ok,PX_OBJECT_EVENT_EXECUTE,PX_MessageBox_BtnYesClick,pm);
 	PX_ObjectRegisterEvent(pm->btn_Cancel,PX_OBJECT_EVENT_EXECUTE,PX_MessageBox_BtnNoClick,pm);
@@ -61,9 +76,9 @@ px_void PX_MessageBoxUpdate(PX_MessageBox *pm,px_dword elpased)
 		{
 		case PX_MESSAGEBOX_MODE_EXPAND:
 			pm->schedule+=elpased;
-			if (pm->schedule>PX_MESSAGEBOX_STAGE_2_TIME)
+			if (pm->schedule>PX_MESSAGEBOX_DEFAULT_STAGE_2_TIME)
 			{
-				pm->schedule=PX_MESSAGEBOX_STAGE_2_TIME;
+				pm->schedule=PX_MESSAGEBOX_DEFAULT_STAGE_2_TIME;
 			}
 			break;
 		case PX_MESSAGEBOX_MODE_CLOSE:
@@ -121,21 +136,21 @@ px_void PX_MessageBoxRender(px_surface *pSurface,PX_MessageBox *pm,px_dword elpa
 
 	
 
-	if (pm->schedule<PX_MESSAGEBOX_STAGE_1_TIME)
+	if (pm->schedule<PX_MESSAGEBOX_DEFAULT_STAGE_1_TIME)
 	{
-		px_int width=pm->window_Width*pm->schedule*pm->schedule/(PX_MESSAGEBOX_STAGE_1_TIME*PX_MESSAGEBOX_STAGE_1_TIME);
-		PX_GeoDrawRect(pSurface,(pm->window_Width-width)/2,(pm->window_Height-PX_MESSAGEBOX_BOX_STAGE_1_HEIGHT)/2,(pm->window_Width+width)/2,(pm->window_Height+PX_MESSAGEBOX_BOX_STAGE_1_HEIGHT)/2,backGroundColor);
+		px_int width=pm->window_Width*pm->schedule*pm->schedule/(PX_MESSAGEBOX_DEFAULT_STAGE_1_TIME*PX_MESSAGEBOX_DEFAULT_STAGE_1_TIME);
+		PX_GeoDrawRect(pSurface,(pm->window_Width-width)/2,(pm->window_Height-pm->PX_MESSAGEBOX_STAGE_1_HEIGHT)/2,(pm->window_Width+width)/2,(pm->window_Height+pm->PX_MESSAGEBOX_STAGE_1_HEIGHT)/2,backGroundColor);
 	}
-	else if(pm->schedule<PX_MESSAGEBOX_STAGE_2_TIME)
+	else if(pm->schedule<PX_MESSAGEBOX_DEFAULT_STAGE_2_TIME)
 	{
-		px_int height=PX_MESSAGEBOX_STAGE_2_HEIGHT*pm->schedule*pm->schedule/(PX_MESSAGEBOX_STAGE_2_TIME*PX_MESSAGEBOX_STAGE_2_TIME);
+		px_int height=PX_MESSAGEBOX_DEFAULT_STAGE_2_HEIGHT*pm->schedule*pm->schedule/(PX_MESSAGEBOX_DEFAULT_STAGE_2_TIME*PX_MESSAGEBOX_DEFAULT_STAGE_2_TIME);
 		PX_GeoDrawRect(pSurface,0,(pm->window_Height-height)/2,pm->window_Width-1,(pm->window_Height+height)/2,backGroundColor);
 	}
 	else
 	{
-		PX_GeoDrawRect(pSurface,0,(pm->window_Height-PX_MESSAGEBOX_STAGE_2_HEIGHT)/2,pm->window_Width-1,(pm->window_Height+PX_MESSAGEBOX_STAGE_2_HEIGHT)/2,backGroundColor);
-		PX_GeoDrawRect(pSurface,0,(pm->window_Height-PX_MESSAGEBOX_STAGE_2_HEIGHT)/2-30,pm->window_Width-1,(pm->window_Height-PX_MESSAGEBOX_STAGE_2_HEIGHT)/2-10,backGroundColor);
-		PX_GeoDrawRect(pSurface,0,(pm->window_Height+PX_MESSAGEBOX_STAGE_2_HEIGHT)/2+10,pm->window_Width-1,(pm->window_Height+PX_MESSAGEBOX_STAGE_2_HEIGHT)/2+30,backGroundColor);
+		PX_GeoDrawRect(pSurface,0,(pm->window_Height-pm->PX_MESSAGEBOX_STAGE_2_HEIGHT)/2,pm->window_Width-1,(pm->window_Height+pm->PX_MESSAGEBOX_STAGE_2_HEIGHT)/2,backGroundColor);
+		PX_GeoDrawRect(pSurface,0,(pm->window_Height-pm->PX_MESSAGEBOX_STAGE_2_HEIGHT)/2-30,pm->window_Width-1,(pm->window_Height-pm->PX_MESSAGEBOX_STAGE_2_HEIGHT)/2-10,backGroundColor);
+		PX_GeoDrawRect(pSurface,0,(pm->window_Height+pm->PX_MESSAGEBOX_STAGE_2_HEIGHT)/2+10,pm->window_Width-1,(pm->window_Height+pm->PX_MESSAGEBOX_STAGE_2_HEIGHT)/2+30,backGroundColor);
 
 		if (pm->fontmodule)
 		{
@@ -160,10 +175,40 @@ px_void PX_MessageBoxAlertOk(PX_MessageBox *pm,const px_char *message)
 	pm->mode=PX_MESSAGEBOX_MODE_EXPAND;
 	pm->btn_Cancel->Visible=PX_FALSE;
 	pm->btn_Ok->Visible=PX_TRUE;
+
+	pm->function_yes=PX_NULL;
+	pm->function_no_ptr=PX_NULL;
+}
+
+px_void PX_MessageBoxAlertOkEx(PX_MessageBox *pm,const px_char *message,PX_MessageBoxCallBack func_callback,px_void *ptr)
+{
+	pm->function_yes=func_callback;
+	pm->function_yes_ptr=ptr;
+
+	pm->schedule=0;
+	pm->show=PX_TRUE;
+	pm->Message=message;
+	pm->mode=PX_MESSAGEBOX_MODE_EXPAND;
+	pm->btn_Cancel->Visible=PX_FALSE;
+	pm->btn_Ok->Visible=PX_TRUE;;
+}
+
+px_void PX_MessageBoxAlert(PX_MessageBox *pm,const px_char *message)
+{
+	pm->schedule=0;
+	pm->show=PX_TRUE;
+	pm->Message=message;
+	pm->mode=PX_MESSAGEBOX_MODE_EXPAND;
+	pm->btn_Cancel->Visible=PX_FALSE;
+	pm->btn_Ok->Visible=PX_FALSE;
+
+	pm->function_yes=PX_NULL;
+	pm->function_no_ptr=PX_NULL;
 }
 
 
-px_void PX_MessageBoxYesNo(PX_MessageBox *pm,const char *message)
+
+px_void PX_MessageBoxAlertYesNo(PX_MessageBox *pm,const char *message)
 {
 	pm->schedule=0;
 	pm->show=PX_TRUE;
@@ -171,8 +216,25 @@ px_void PX_MessageBoxYesNo(PX_MessageBox *pm,const char *message)
 	pm->mode=PX_MESSAGEBOX_MODE_EXPAND;
 	pm->btn_Cancel->Visible=PX_TRUE;
 	pm->btn_Ok->Visible=PX_TRUE;
+	pm->function_yes=PX_NULL;
+	pm->function_no_ptr=PX_NULL;
 }
 
+
+px_void PX_MessageBoxAlertYesNoEx(PX_MessageBox *pm,const char *Message,PX_MessageBoxCallBack func_yescallback,px_void *yesptr,PX_MessageBoxCallBack func_nocallback,px_void *noptr)
+{
+	pm->function_yes=func_yescallback;
+	pm->function_no=func_nocallback;
+	pm->function_yes_ptr=yesptr;
+	pm->function_no_ptr=noptr;
+
+	pm->schedule=0;
+	pm->show=PX_TRUE;
+	pm->Message=Message;
+	pm->mode=PX_MESSAGEBOX_MODE_EXPAND;
+	pm->btn_Cancel->Visible=PX_TRUE;
+	pm->btn_Ok->Visible=PX_TRUE;
+}
 
 px_void PX_MessageBoxSetColorModule(PX_MessageBox *pm,PX_MESSAGEBOX_COLORMOD colormod)
 {
@@ -211,6 +273,11 @@ px_void PX_MessageBoxSetColorModule(PX_MessageBox *pm,PX_MESSAGEBOX_COLORMOD col
 		break;
 	}
 
+}
+
+px_void PX_MessageBoxSetFontModule(PX_MessageBox *pm,PX_FontModule *fm)
+{
+	pm->fontmodule=fm;
 }
 
 PX_MESSAGEBOX_RETURN PX_MessageBoxGetLastReturn(PX_MessageBox *pm)

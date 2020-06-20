@@ -428,6 +428,7 @@ px_void PX_WorldRemoveObject(PX_World *world,PX_Object *pObject)
 		if (pwo->pObject==pObject)
 		{
 			pwo->DeleteMark=PX_TRUE;
+
 			return;
 		}
 	}

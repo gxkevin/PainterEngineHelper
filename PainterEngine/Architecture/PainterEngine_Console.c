@@ -82,7 +82,7 @@ px_void PX_ConsoleUpdateEx(PX_Console *pc)
 	}
 	PX_ObjectSetPosition(pc->Input,0,(px_float)y,0);
 }
-PX_Object * PX_ConsolePrintText(PX_Console *pc,px_char *text)
+PX_Object * PX_ConsolePrintText(PX_Console *pc,const px_char *text)
 {
 	PX_ConsoleColumn obj;
 	PX_Object *pObject=PX_Object_AutoTextCreate(&pc->runtime->mp_ui,PX_Object_ScrollAreaGetIncludedObjects(pc->Area),0,0,pc->runtime->width-1);
