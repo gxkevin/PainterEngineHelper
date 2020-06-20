@@ -16,7 +16,7 @@
 <br/><br/><br/>
 ===========================================================================
 <br/><br/><br/>
-<h1>本版本为PainterEngine的学习库,PainterEngine工程库请访问https://github.com/matrixcascade/PainterEngineCore</h1>
+<h1>本版本为PainterEngine的学习库,PainterEngine工程库请访问https://github.com/matrixcascade/PainterEngine</h1>
 ===========================================================================<br/>
 2019-9-23加入了3D软渲染支持<br/>
 <div align=center><img src ="https://raw.githubusercontent.com/matrixcascade/PainterEngine/master/demo/texturemapping.gif"/></div><br/>
